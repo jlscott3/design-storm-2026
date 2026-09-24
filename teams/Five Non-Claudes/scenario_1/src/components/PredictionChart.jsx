@@ -37,7 +37,7 @@ export default function PredictionChart({
         Predicted vs actual{unit ? <span className="chart-unit"> ({unit})</span> : null}
       </div>
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={fitted} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <LineChart data={fitted} margin={{ top: 24, right: 16, bottom: 8, left: 0 }}>
           <CartesianGrid stroke="#2b3a5a" strokeDasharray="3 3" />
           <XAxis dataKey="t" tick={{ fill: '#9fb0c9', fontSize: 11 }} minTickGap={48} />
           <YAxis
@@ -60,7 +60,13 @@ export default function PredictionChart({
               x={splitDate}
               stroke="#9fb0c9"
               strokeDasharray="4 4"
-              label={{ value: 'train | test', fill: '#9fb0c9', fontSize: 11, position: 'top' }}
+              label={{
+                value: '← train | test →',
+                fill: '#9fb0c9',
+                fontSize: 11,
+                position: 'insideTop',
+                dy: -14,
+              }}
             />
           )}
           <Line
