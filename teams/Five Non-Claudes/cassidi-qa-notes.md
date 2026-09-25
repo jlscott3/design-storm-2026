@@ -46,9 +46,40 @@ react. Warning ahead of arrival is what would have helped.
 ## Facts about the system and data
 
 - **All sensors have lat/long** for their location.
-- **Jake: there are 4 gates up through the reservoir.** Unclear from our notes
-  which reservoir, and whether these are intake gates at different depths or
-  something else. Ask before building on it.
+- **Jake: there are 4 gates up through the reservoir.** Cassidi's whiteboard
+  sketch (below) answers this: they are intake gates at different depths in
+  Strontia Springs Reservoir.
+
+## Cassidi's whiteboard: Strontia Springs Reservoir by depth
+
+Our reading of a sketch Cassidi drew, photographed by the team. It is a sketch,
+not a drawing to scale.
+
+![Cassidi's whiteboard sketch of Strontia Springs Reservoir: a cross-section with the dam on the right, intakes marked Top, 15, 45 (primary), 65 and 95 ft, the profiling sonde on a buoy line, and the downstream pipes to Marston and Chatfield](cassidi-whiteboard-strontia.jpg)
+
+- **Intakes at the top and at 15, 45, 65 and 95 ft.** The top intake plus four
+  gates matches Jake's "4 gates".
+- **45 ft is the primary gate, and they like it there.** The sketch doesn't say
+  why.
+- **The profiling sonde hangs from a buoy on a line down the water column** beside
+  the gates, so its readings are the water at the intake.
+- **Two numbers at the top of the dam: 6001 and 5990.** Probably elevations in
+  feet (full pool and a water level?). Unconfirmed.
+- **Downstream: Strontia → "C20 pipe" → Marston, with Chatfield also drawn.** Our
+  map draws Conduit 26 to Foothills; the sketch shows a second route we haven't
+  mapped. A note by Marston is illegible in the photo.
+
+What we found when we checked the sonde against it (our analysis of
+`data/Strontia 0407_0819.xlsx`, 357 full casts, 2026-04-07 to 08-19, depths read as
+metres and converted to feet):
+
+- **By turbidity alone, 45 ft is rarely the clearest gate:** the top was clearest
+  in 68% of casts and 45 ft in 1%. So their preference rests on something other
+  than turbidity. Our guess, general knowledge rather than theirs: cooler, steadier
+  water below the algae near the surface and above low-oxygen water near the bottom.
+- **Some weeks a murky layer sat right on the 45 and 65 ft gates:** late July, and
+  Aug 17 to 19 (about 5.7 NTU at 45 ft against 1.4 at the top). The River map's
+  gate panel flags weeks like these rather than recommending a gate.
 
 ## Alkalinity, TOC, and the alum dose (follow-up with Jake and Cassidi)
 
@@ -90,7 +121,10 @@ the slides.
 - Could we get a copy of the Excel sheet (or its formula)? It is the thing a
   plug-and-play tool would replace or wrap.
 - What is the "happy range" of pH for floc at Foothills?
-- Which reservoir has the 4 gates, and what are they (depth-selective intakes)?
+- Are the gate depths (15, 45, 65, 95 ft) measured from the water surface or from
+  full pool? It decides where each gate sits against the sonde's readings.
+- Why is 45 ft the preferred gate? Temperature, algae, manganese, something else?
+- What are 6001 and 5990 on the sketch, and where does the C20 pipe go?
 - What does "barometric" mean for Water Quantity's forecast: barometric pressure,
   or another measure recorded under that name?
 - Which downstream obligations drive the water rights problem, and on what

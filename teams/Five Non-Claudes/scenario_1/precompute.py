@@ -76,20 +76,11 @@ def read_series(filename, date_col, value_col):
     return rows
 
 
-def read_sonde_near_surface(filename):
-    """Reduce the Strontia profiling sonde .xlsx to daily near-surface readings.
-
-    The sonde logs a full-depth profile of the reservoir roughly twice a day: each
-    row is one reading with its own timestamp (Excel serial) and a depth ("Vertical
-    Position", column D). To get one value per day comparable to the daily target,
-    we take the SHALLOWEST reading of each day — the water nearest the surface, the
-    closest analog to what the plant intake draws.
+def sonde_rows(filename):
+    """Yield (timestamp, depth, cells) for every data row of the sonde .xlsx.
 
     Parsed with the standard library only (an .xlsx is a zip of XML), so no extra
-    dependency. Returns {"turbidity": [...], "conductivity": [...]} as {t, v} arrays.
-
-    Columns (1-indexed): A=timestamp, C=conductivity, D=vertical position (depth),
-    G=turbidity NTU.
+    dependency. `cells` maps column letter to raw string value.
     """
     path = os.path.join(DATA, filename)
 
@@ -99,8 +90,6 @@ def read_sonde_near_surface(filename):
     with zipfile.ZipFile(path) as z:
         sheet = z.read("xl/worksheets/sheet1.xml").decode("utf-8")
 
-    # shallowest[day] = (depth, turbidity, conductivity) for the shallowest row so far
-    shallowest = {}
     for row_xml in re.findall(r"<row[^>]*>(.*?)</row>", sheet, re.S):
         cells = {}
         has_string_cell = False
@@ -121,9 +110,29 @@ def read_sonde_near_surface(filename):
             depth = float(cells.get("D", ""))
         except ValueError:
             continue
+        yield EXCEL_EPOCH + dt.timedelta(days=serial), depth, cells
+
+
+def read_sonde_near_surface(filename):
+    """Reduce the Strontia profiling sonde .xlsx to daily near-surface readings.
+
+    The sonde logs a full-depth profile of the reservoir roughly twice a day: each
+    row is one reading with its own timestamp (Excel serial) and a depth ("Vertical
+    Position", column D). To get one value per day comparable to the daily target,
+    we take the SHALLOWEST reading of each day — the water nearest the surface, the
+    closest analog to what the plant intake draws.
+
+    Returns {"turbidity": [...], "conductivity": [...]} as {t, v} arrays.
+
+    Columns (1-indexed): A=timestamp, C=conductivity, D=vertical position (depth),
+    G=turbidity NTU.
+    """
+    # shallowest[day] = (depth, turbidity, conductivity) for the shallowest row so far
+    shallowest = {}
+    for when, depth, cells in sonde_rows(filename):
         turbidity = num(cells.get("G"))
         conductivity = num(cells.get("C"))
-        day = (EXCEL_EPOCH + dt.timedelta(days=serial)).date().isoformat()
+        day = when.date().isoformat()
         prev = shallowest.get(day)
         if prev is None or depth < prev[0]:
             shallowest[day] = (depth, turbidity, conductivity)
@@ -137,6 +146,63 @@ def read_sonde_near_surface(filename):
         key=lambda r: r["t"],
     )
     return {"turbidity": turb, "conductivity": cond}
+
+
+PROFILE_DAYS = 7
+PROFILE_BAND_M = 2
+
+
+def quantile(sorted_vals, q):
+    """Linear-interpolated quantile of an already sorted list."""
+    pos = (len(sorted_vals) - 1) * q
+    lo = int(pos)
+    hi = min(lo + 1, len(sorted_vals) - 1)
+    return sorted_vals[lo] + (sorted_vals[hi] - sorted_vals[lo]) * (pos - lo)
+
+
+def read_sonde_profile(filename):
+    """What the reservoir looks like by depth over the sonde's last week.
+
+    Every cast in the final PROFILE_DAYS days is pooled and cut into
+    PROFILE_BAND_M-metre depth bands. Each band carries the 25th/50th/75th
+    percentile of turbidity (so one odd cast can't make a layer look murky) and
+    the median temperature, conductivity and chlorophyll. Depth is the file's
+    "Vertical Position"; the file doesn't state units, and the 0.9-48 range reads
+    as metres below the surface.
+    """
+    rows = list(sonde_rows(filename))
+    end = max(when for when, _, _ in rows)
+    start = end - dt.timedelta(days=PROFILE_DAYS)
+    bands = {}
+    for when, depth, cells in rows:
+        if when <= start:
+            continue
+        b = bands.setdefault(int(depth // PROFILE_BAND_M), {"turb": [], "temp": [], "cond": [], "chl": []})
+        for key, col in (("turb", "G"), ("temp", "B"), ("cond", "C"), ("chl", "H")):
+            v = num(cells.get(col))
+            if v is not None:
+                b[key].append(v)
+
+    out = []
+    for i in sorted(bands):
+        b = {k: sorted(v) for k, v in bands[i].items()}
+        if not b["turb"]:
+            continue
+        med = lambda k: round(quantile(b[k], 0.5), 2) if b[k] else None
+        out.append({
+            "top": i * PROFILE_BAND_M,
+            "bottom": (i + 1) * PROFILE_BAND_M,
+            "n": len(b["turb"]),
+            "turbidity": [round(quantile(b["turb"], q), 2) for q in (0.25, 0.5, 0.75)],
+            "temp": med("temp"),
+            "cond": med("cond"),
+            "chl": med("chl"),
+        })
+    return {
+        "from": (start + dt.timedelta(seconds=1)).date().isoformat(),
+        "to": end.date().isoformat(),
+        "bands": out,
+    }
 
 
 def main():
@@ -214,7 +280,7 @@ def main():
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as fh:
-        json.dump({"_meta": meta, "series": series}, fh, separators=(",", ":"))
+        json.dump({"_meta": meta, "series": series, "sonde_profile": read_sonde_profile(SONDE_FILE)}, fh, separators=(",", ":"))
 
     counts = {k: len(v) for k, v in series.items()}
     total = sum(counts.values())

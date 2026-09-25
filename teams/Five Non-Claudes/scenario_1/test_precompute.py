@@ -77,6 +77,24 @@ def main():
         if pts[0]["t"] < "2026-04-01" or pts[-1]["t"] > "2026-08-31":
             fail(f"{name} spans {pts[0]['t']}..{pts[-1]['t']}, expected 2026-04..08 only")
 
+    # The depth profile covers the sonde's last week, top to bottom in contiguous
+    # bands, so the River map can show the whole water column without gaps.
+    profile = doc.get("sonde_profile")
+    if not profile or not profile["bands"]:
+        fail("sonde_profile missing or empty")
+    if profile["to"] != series["sonde_turbidity"][-1]["t"]:
+        fail(f"sonde_profile ends {profile['to']}, expected the sonde's last day")
+    bands = profile["bands"]
+    if bands[0]["top"] != 0 or bands[-1]["bottom"] < 40:
+        fail(f"sonde_profile spans {bands[0]['top']}..{bands[-1]['bottom']} m, expected surface to 40+ m")
+    for a, b in zip(bands, bands[1:]):
+        if a["bottom"] != b["top"]:
+            fail(f"sonde_profile gap between {a['bottom']} and {b['top']} m")
+    for b in bands:
+        lo, mid, hi = b["turbidity"]
+        if not (lo <= mid <= hi):
+            fail(f"sonde_profile {b['top']} m: turbidity quartiles out of order")
+
     total = sum(len(v) for v in series.values())
     print(f"OK: {len(series)} series, {total} points, all dates ISO & sorted, "
           f"winter gap preserved, toc/alk aligned ({len(series['toc'])} each)")

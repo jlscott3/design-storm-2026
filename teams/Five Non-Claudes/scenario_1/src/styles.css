@@ -418,3 +418,51 @@ select {
 .forecast-heading { margin: 4px 0 16px; }
 .forecast-heading h2 { margin: 0 0 4px; font-size: 19px; }
 .forecast-subhead { margin: 0; color: var(--muted); font-size: 13px; }
+
+/* River map: sonde depth profile */
+.sonde-panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.sonde-panel h3 { margin: 2px 0 4px; font-size: 17px; }
+.sonde-body { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .sonde-body { grid-template-columns: minmax(0, 1fr); } }
+.sonde-chart { margin: 0; }
+.sonde-chart svg { display: block; width: 100%; height: auto; cursor: ns-resize; touch-action: none; }
+.sonde-grid { stroke: var(--line); stroke-width: 1; }
+.sonde-axis { fill: var(--muted); font-size: 12px; }
+.sonde-range { fill: var(--accent); opacity: 0.22; }
+.sonde-median { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.sonde-murky-band { fill: var(--warn); opacity: 0.12; }
+.sonde-band-label { paint-order: stroke; stroke: var(--panel); stroke-width: 4px; fill: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.sonde-gate-line { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.7; }
+.sonde-gate.on .sonde-gate-line { stroke: var(--ink); stroke-width: 1.5; opacity: 1; }
+.sonde-gate-label { fill: var(--muted); font-size: 12px; }
+.sonde-gate.on .sonde-gate-label { fill: var(--ink); font-weight: 600; }
+.sonde-gates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.sonde-gate-btn {
+  background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.sonde-gate-btn:hover { color: var(--ink); border-color: var(--muted); }
+.sonde-gate-btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+.sonde-pick-dot { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+.sonde-caption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.sonde-side { display: flex; flex-direction: column; gap: 14px; }
+.sonde-at { display: flex; flex-direction: column; gap: 8px; }
+.sonde-at-head { font-weight: 600; }
+.sonde-reading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.sonde-reading-label { color: var(--muted); font-size: 13px; min-width: 96px; }
+.sonde-reading-num { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sonde-unit { font-size: 13px; font-weight: 400; color: var(--muted); }
+.sonde-reading-sub { color: var(--muted); font-size: 12px; flex-basis: 100%; padding-left: 106px; margin-top: -4px; }
+.sonde-suggest { background: var(--panel-2); border: 1px solid var(--line); border-left: 3px solid var(--alk); border-radius: 10px; padding: 12px 14px; }
+.sonde-suggest-label { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.sonde-suggest.look { border-left-color: var(--warn); }
+.sonde-suggest-num { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sonde-suggest p { margin: 4px 0 8px; font-size: 13px; }
+.sonde-jump {
+  background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px 12px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.sonde-jump:hover { border-color: var(--ink); }

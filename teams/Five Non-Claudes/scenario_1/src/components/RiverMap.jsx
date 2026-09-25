@@ -3,6 +3,7 @@ import { useLiveInputs } from '../lib/useLiveInputs.js'
 import { riverOutlook } from '../lib/riverOutlook.js'
 import { DEFAULT_THRESHOLDS } from '../lib/recommend.js'
 import geo from '../riverMap/geometry.json'
+import SondeProfile from './SondeProfile.jsx'
 
 const DAY_FMT = { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }
 const dayLabel = (iso) => new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', DAY_FMT)
@@ -99,6 +100,8 @@ export default function RiverMap({ doc, fetchImpl }) {
 
       <MapFigure />
 
+      {doc.sonde_profile && <SondeProfile profile={doc.sonde_profile} />}
+
       <p className="note">
         Pins mark where each stop's readings are taken, not a travel time: water from the
         gage reaches the plant in hours, and the days of warning come from mixing in the
@@ -186,6 +189,7 @@ function MapFigure() {
         <Label x={p.gage[0] + 18} y={p.gage[1] + 26} strong>Gage above Strontia Springs</Label>
         <Label x={p.gage[0] + 18} y={p.gage[1] + 42}>USGS 06707525 · every 15 min</Label>
         <Label x={p.intake[0] - 14} y={p.intake[1] - 40} anchor="end" strong>Strontia Springs Reservoir</Label>
+        <Label x={p.intake[0] - 14} y={p.intake[1] - 24} anchor="end">Profiling sonde: depth view below</Label>
         <Label x={(p.intake[0] + p.plant[0]) / 2 + 12} y={(p.intake[1] + p.plant[1]) / 2 + 22}>Conduit 26 (route simplified)</Label>
         <Label x={(pb[0] + pb[2]) / 2} y={pb[1] - 12} anchor="middle" strong>Foothills Treatment Plant</Label>
         <circle cx={p.gage[0]} cy={p.gage[1]} r="5" className="map-station" />

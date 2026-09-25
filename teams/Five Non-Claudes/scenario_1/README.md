@@ -24,6 +24,16 @@ The app has three tabs:
   dam and plant outlines in `geo/osm-strontia-foothills.json` (OpenStreetMap,
   fetched 2026-09-25). Conduit 26 is not in OpenStreetMap, so it is drawn as a
   straight dashed line.
+  Below the map, **Inside Strontia Springs Reservoir** shows the profiling sonde's
+  last week of casts by depth, in feet, with the intake gates marked (Top, 15, 45,
+  65, 95 ft; 45 ft is the primary, from Cassidi's whiteboard sketch). Pick a gate to
+  see turbidity, temperature, conductivity and chlorophyll there. The panel flags a
+  week when the primary gate sat in a murky layer and names the clearest gate, but it
+  doesn't pick one: Denver Water prefers 45 ft for reasons turbidity doesn't capture
+  (`src/lib/sondeProfile.js`). Gate depths are taken as feet below the actual
+  surface; if they are from full pool, the gates sit shallower. Gate choice does not
+  feed the plant forecasts, because this one season of sonde data doesn't track the
+  plant's lab values at any depth. `precompute.py` builds it into `series.json` as `sonde_profile`.
 - **Explorer** — the analysis view. Pick a target, a feature, and a lead time (lag)
   and watch the model re-fit and re-score against the historical lab values, so you
   can judge which signals and lead times actually predict well. Includes the
