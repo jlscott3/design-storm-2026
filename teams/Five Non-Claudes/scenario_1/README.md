@@ -40,13 +40,28 @@ archived value if offline:
 | Streamflow | USGS IV, gage 06701900 (param 00060 — the WQ gage publishes no flow) |
 | Snowpack SWE | NRCS SNOTEL, Hoosier Pass (531:CO:SNTL, WTEQ) |
 
-## Thresholds
+### Mock alum dose (illustrative, NOT a real calculation)
 
-Adjustable in the Live forecast tab. Defaults: TOC ≥ 3 mg/L (a demo "elevated" cutoff,
-not a regulatory limit) and alkalinity ≤ 60 mg/L. Jake and Cassidi confirmed 60 is the
-regulatory line where the required TOC removal changes, and that operators aim for
-alkalinity between 50 and 80 (see [`cassidi-qa-notes.md`](../cassidi-qa-notes.md)).
-It stays editable so the demo can show the effect of a different cutoff.
+Its own section above the forecast (it's a "what to do now" recommendation), tagged
+"MOCK" with the full caveat in a tooltip on that tag. We have no dosing formula. It is
+a deliberately transparent toy relation anchored to one unverified example from the
+Denver Water Q&A (≈3 mg/L TOC → ≈11 alum): about 3.7 mg/L alum per mg/L of forecast
+TOC, nudged up when forecast alkalinity is below the watch line (low alkalinity needs
+more coagulant to hold pH in the floc range). It moves with the forecast for demo
+purposes but is not calibrated and must not be read as guidance. The real thing it
+gestures at is Denver Water's operator Excel sheet, which we did not have.
+
+### Thresholds
+
+Adjustable in the Live forecast tab.
+
+- **TOC**: a single line, default ≥ 3 mg/L (a demo "elevated" cutoff, not a regulatory
+  limit).
+- **Alkalinity**: a two-tier band. A **watch** line at 60 mg/L (Jake's low-alkalinity
+  line — Denver Water questions whether 60 is the acting number, so it's editable) and
+  a firmer **act** line at 50 mg/L, below which the water becomes materially harder to
+  treat. The recommendation escalates from "watch" to "act" as the forecast crosses
+  each; the forecast chart draws both lines.
 
 ## Stack
 
@@ -126,25 +141,31 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
 3. Point at the recommendation card and the two threshold charts. "From today's reading
    the model projects TOC and alkalinity out seven days and checks each against the
    operating threshold. The card says, in plain language, whether and when we cross it —
-   that's the heads-up an operator wants. It describes what's coming; it doesn't tell
-   them what to dose."
-4. Nudge a threshold. "60 is where the regulation changes how much TOC they must
-   remove. The threshold is adjustable, and the recommendation updates."
+   that's the heads-up an operator wants."
+4. Point at the alkalinity chart's two lines. "Alkalinity has a band: a watch line at
+   60 and an act line at 50 — below 50 the water gets materially harder to treat. The
+   card escalates from 'watch' to 'act' as the forecast crosses each. And because
+   Denver Water asks whether 60 is really their number, all of these are adjustable."
+5. Point at the MOCK alum dose, and say the quiet part out loud. "This dose is a
+   placeholder — we don't have their formula. It's anchored to one example from the
+   Q&A and moves with the forecast, but it's labeled MOCK for a reason. The real
+   version wraps their operator spreadsheet, which is exactly the plug-and-play tool
+   they asked for."
 
 **Explorer tab (how good is the model, really):**
 
-5. "Here's TOC over four years. The orange line is what the lab actually measured. The
+6. "Here's TOC over four years. The orange line is what the lab actually measured. The
    dashed blue line is that same one-variable model." Point at the train/test divider:
    "it only learned from the left; everything right of the line is the honest test."
-6. Read the formula and the test R² aloud. "One number, one line — and it already
+7. Read the formula and the test R² aloud. "One number, one line — and it already
    tracks the big spring peaks."
-7. Drag the lead-time slider. "More lead time for the operators costs some accuracy —
+8. Drag the lead-time slider. "More lead time for the operators costs some accuracy —
    watch the score move. That trade is the whole question Denver Water put to us."
-8. Toggle to Alkalinity. "Different signal — specific conductance, dissolved minerals —
+9. Toggle to Alkalinity. "Different signal — specific conductance, dissolved minerals —
    and a straight line explains about half the variation on its own."
-9. Gesture at the upstream-signals panel. "These are the things that arrive before the
+10. Gesture at the upstream-signals panel. "These are the things that arrive before the
    water does. The one outlined in blue is what's driving the prediction right now."
-10. Drop to the comparison card. "Cassidi starred one idea: the reservoir sonde, which
+11. Drop to the comparison card. "Cassidi starred one idea: the reservoir sonde, which
    sits right at the plant intake. It should be a sharper signal — but it buys you
    hours of warning instead of days, and we only have one partial season of it. So the
    honest answer is 'promising, go collect more,' not 'it wins.'"

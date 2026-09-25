@@ -9,6 +9,21 @@ import { breaches } from './recommend.js'
 // and 4 is alkalinity's; both targets are shown at both, as on the Live tab.
 export const MAP_HORIZONS = [4, 2]
 
+/**
+ * The most serious threshold line a value crosses, or null. TOC has one line
+ * (`value`); alkalinity has a softer `watch` and a firmer `act` (recommend.js).
+ * @returns {{ tier: 'watch'|'act', line: number } | null}
+ */
+export function thresholdFlag(value, threshold) {
+  const { direction } = threshold
+  const act = threshold.act ?? threshold.value
+  if (act != null && breaches(value, act, direction)) return { tier: 'act', line: act }
+  if (threshold.watch != null && breaches(value, threshold.watch, direction)) {
+    return { tier: 'watch', line: threshold.watch }
+  }
+  return null
+}
+
 function forecastAt(series, targetName, featureName, current, horizon, threshold, today) {
   const f = buildForecast(series, targetName, featureName, current, { horizons: [horizon], today })
   const p = f.points[0]
@@ -17,7 +32,7 @@ function forecastAt(series, targetName, featureName, current, horizon, threshold
     date: p.date,
     predicted: p.predicted,
     rmse: p.rmse,
-    crosses: breaches(p.predicted, threshold.value, threshold.direction),
+    flag: thresholdFlag(p.predicted, threshold),
   }
 }
 

@@ -5,7 +5,7 @@ import React from 'react'
  * DESCRIPTIVE only: it states what the forecast implies against each threshold and
  * does not prescribe chemical dosing or treatment actions (those are the operator's
  * professional call). It answers, at a glance, the sketch's two questions by simply
- * surfacing what is coming.
+ * surfacing what is coming. (The mock alum dose lives in its own DoseCard above.)
  *
  * @param {object} props
  * @param {{level:string, message:string}} props.toc

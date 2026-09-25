@@ -25,9 +25,9 @@ function Value({ label, f, digits, threshold }) {
       <span className="map-value-label">{label}</span>
       <span className="map-value-num">{f.predicted.toFixed(digits)} mg/L</span>
       <span className="map-value-range">± {f.rmse.toFixed(digits)}</span>
-      {f.crosses && (
-        <span className="map-flag">
-          <span aria-hidden="true">▲</span> {word} {threshold.value}
+      {f.flag && (
+        <span className={`map-flag ${f.flag.tier}`}>
+          <span aria-hidden="true">▲</span> {word} {f.flag.line}
         </span>
       )}
     </div>

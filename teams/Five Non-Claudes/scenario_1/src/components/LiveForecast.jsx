@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react'
 import { useLiveInputs } from '../lib/useLiveInputs.js'
 import { buildForecast } from '../lib/forecast.js'
-import { assess, DEFAULT_THRESHOLDS } from '../lib/recommend.js'
+import { assess, assessBanded, DEFAULT_THRESHOLDS } from '../lib/recommend.js'
+import { mockAlumDose, valueAtHorizon } from '../lib/mockDose.js'
 import { TARGETS } from '../lib/features.js'
 import RecommendationCard from './RecommendationCard.jsx'
+import DoseCard from './DoseCard.jsx'
 import CurrentInputs from './CurrentInputs.jsx'
 import ThresholdControls from './ThresholdControls.jsx'
 import ForecastChart from './ForecastChart.jsx'
@@ -29,14 +31,25 @@ export default function LiveForecast({ doc, fetchImpl }) {
   }, [series, resolved])
 
   const tocAssess = assess(forecasts.toc.points, thresholds.toc)
-  const alkAssess = assess(forecasts.alk.points, thresholds.alk)
+  const alkAssess = assessBanded(forecasts.alk.points, thresholds.alk)
 
-  const handleThreshold = (target, value) =>
-    setThresholds((t) => ({ ...t, [target]: { ...t[target], value } }))
+  // MOCK alum dose from the near-term (first-horizon) forecast values. Illustrative
+  // only; the mockDose module documents why this is not a real calculation.
+  const dose = useMemo(() => {
+    const tocNow = valueAtHorizon(forecasts.toc.points, 1)
+    const alkNow = valueAtHorizon(forecasts.alk.points, 1)
+    return mockAlumDose(tocNow, alkNow, thresholds.alk.watch)
+  }, [forecasts, thresholds.alk.watch])
+
+  // TOC has one threshold field ('value'); alkalinity has two ('watch', 'act').
+  const handleThreshold = (target, key, value) =>
+    setThresholds((t) => ({ ...t, [target]: { ...t[target], [key]: value } }))
 
   return (
     <section className="live-forecast">
       {loading && <p className="placeholder">Fetching current upstream conditions…</p>}
+
+      <DoseCard dose={dose} />
 
       <RecommendationCard toc={tocAssess} alk={alkAssess} />
 
@@ -47,16 +60,17 @@ export default function LiveForecast({ doc, fetchImpl }) {
       <div className="forecast-grid">
         <ForecastChart
           points={forecasts.toc.points}
-          threshold={thresholds.toc.value}
-          direction={thresholds.toc.direction}
+          thresholds={[{ value: thresholds.toc.value, label: 'threshold', color: '#ff8a8a' }]}
           color={TARGET_COLORS.toc}
           unit="mg/L"
           label={TARGETS.toc.label}
         />
         <ForecastChart
           points={forecasts.alk.points}
-          threshold={thresholds.alk.value}
-          direction={thresholds.alk.direction}
+          thresholds={[
+            { value: thresholds.alk.watch, label: 'watch', color: '#ffd27a' },
+            { value: thresholds.alk.act, label: 'act', color: '#ff8a8a' },
+          ]}
           color={TARGET_COLORS.alk}
           unit="mg/L"
           label={TARGETS.alk.label}

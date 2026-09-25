@@ -3,12 +3,18 @@
 // it deliberately gives no chemical-dosing or treatment advice — those are
 // professional decisions for the operator, not this demo.
 
-// Default operating thresholds. TOC's is a demo cutoff (the guide uses >3 mg/L only
-// as an "unusual day" weighting); alkalinity's 60 mg/L is Jake's low-alkalinity line.
-// Both are adjustable in the UI, per Denver Water's own "is 60 the right number?".
+// Default operating thresholds.
+//
+// TOC: a single demo cutoff (the guide uses >3 mg/L only as an "unusual day"
+// weighting, not a regulatory limit).
+//
+// Alkalinity: a two-tier band, both editable. 60 mg/L is Jake's low-alkalinity
+// "watch" line (Denver Water itself questions whether 60 is the acting number); 50
+// mg/L is a firmer "act" line — below it the water becomes materially harder to
+// treat. Crossing 60 is a watch; crossing 50 is a concern.
 export const DEFAULT_THRESHOLDS = {
   toc: { value: 3, direction: 'above', label: 'Elevated TOC' },
-  alk: { value: 60, direction: 'below', label: 'Low alkalinity' },
+  alk: { watch: 60, act: 50, direction: 'below', label: 'Low alkalinity' },
 }
 
 /**
@@ -65,6 +71,63 @@ export function assess(points, threshold) {
     message:
       `${label}: forecast stays ${direction === 'above' ? 'below' : 'above'} the ` +
       `${value} threshold across the next ${points[points.length - 1].horizon} days ` +
+      `(closest ${closest.predicted.toFixed(2)} on ${closest.date}).`,
+  }
+}
+
+/**
+ * Assess a forecast against a TWO-TIER band (a softer "watch" line and a firmer "act"
+ * line, same direction of concern). Severity comes from which tier is crossed, not
+ * from how soon: crossing the act line anywhere in the window is 'breach'; crossing
+ * only the watch line is 'approaching'; neither is 'clear'. The message leads with the
+ * more severe tier and its lead time.
+ *
+ * @param {{horizon:number, date:string, predicted:number}[]} points
+ * @param {{watch:number, act:number, direction:'above'|'below', label:string}} band
+ */
+export function assessBanded(points, band) {
+  if (!points || points.length === 0) {
+    return { level: 'clear', firstBreachHorizon: null, message: 'No forecast available.' }
+  }
+  const { watch, act, direction, label } = band
+  const word = direction === 'above' ? 'above' : 'below'
+  const leadPhrase = (h) => {
+    const day = h === 1 ? '1 day' : `${h} days`
+    return h === points[0].horizon ? `within the next ${day}` : `in about ${day}`
+  }
+
+  const firstAct = points.find((p) => breaches(p.predicted, act, direction))
+  if (firstAct) {
+    return {
+      level: 'breach',
+      firstBreachHorizon: firstAct.horizon,
+      message:
+        `${label}: forecast crosses ${word} the ${act} act line ${leadPhrase(firstAct.horizon)} ` +
+        `(predicted ${firstAct.predicted.toFixed(2)} on ${firstAct.date}). Treatability drops sharply below ${act}.`,
+    }
+  }
+
+  const firstWatch = points.find((p) => breaches(p.predicted, watch, direction))
+  if (firstWatch) {
+    return {
+      level: 'approaching',
+      firstBreachHorizon: firstWatch.horizon,
+      message:
+        `${label}: forecast crosses ${word} the ${watch} watch line ${leadPhrase(firstWatch.horizon)} ` +
+        `(predicted ${firstWatch.predicted.toFixed(2)} on ${firstWatch.date}), but stays above the ${act} act line.`,
+    }
+  }
+
+  const target = direction === 'below' ? Math.min(watch, act) : Math.max(watch, act)
+  const closest = points.reduce((a, b) =>
+    Math.abs(b.predicted - target) < Math.abs(a.predicted - target) ? b : a,
+  )
+  return {
+    level: 'clear',
+    firstBreachHorizon: null,
+    message:
+      `${label}: forecast stays ${direction === 'above' ? 'below' : 'above'} the ${watch} ` +
+      `watch line across the next ${points[points.length - 1].horizon} days ` +
       `(closest ${closest.predicted.toFixed(2)} on ${closest.date}).`,
   }
 }

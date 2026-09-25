@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { riverOutlook, MAP_HORIZONS } from './riverOutlook.js'
+import { riverOutlook, thresholdFlag, MAP_HORIZONS } from './riverOutlook.js'
 import { buildForecast } from './forecast.js'
 import { DEFAULT_THRESHOLDS } from './recommend.js'
 
@@ -59,9 +59,16 @@ describe('riverOutlook', () => {
 
   it('flags a forecast that crosses the operating threshold', () => {
     const high = riverOutlook(series, resolvedWith(10000, 300), DEFAULT_THRESHOLDS, today)
-    expect(high.ahead[1].toc.crosses).toBe(true)
+    expect(high.ahead[1].toc.flag).toEqual({ tier: 'act', line: 3 })
     const low = riverOutlook(series, resolvedWith(100, 300), DEFAULT_THRESHOLDS, today)
-    expect(low.ahead[1].toc.crosses).toBe(false)
+    expect(low.ahead[1].toc.flag).toBeNull()
+  })
+
+  it('names the most serious alkalinity line crossed, as the Live tab does', () => {
+    const t = DEFAULT_THRESHOLDS.alk
+    expect(thresholdFlag(65, t)).toBeNull()
+    expect(thresholdFlag(58, t)).toEqual({ tier: 'watch', line: 60 })
+    expect(thresholdFlag(48, t)).toEqual({ tier: 'act', line: 50 })
   })
 
   it('estimates today from a same-day model and keeps the last lab result separate', () => {
