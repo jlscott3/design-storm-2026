@@ -353,6 +353,68 @@ select {
 .dose-grams { font-size: 13px; color: var(--muted); }
 .dose-basis { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
+/* River map tab */
+.map-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 1000px) { .map-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .map-cards { grid-template-columns: minmax(0, 1fr); } }
+.map-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.map-card-today { border-color: var(--ink); }
+.map-card h3 { margin: 2px 0 4px; font-size: 17px; }
+.map-card-head { display: flex; align-items: center; gap: 8px; }
+.map-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink); color: var(--bg); font-weight: 700; font-size: 13px;
+}
+.map-chip {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink); background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 999px; padding: 2px 8px;
+}
+.map-chip-today { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.map-date { color: var(--muted); font-size: 12px; }
+.map-row { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.map-src { color: var(--muted); font-size: 12px; margin-top: -4px; }
+.map-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.map-value-label { color: var(--muted); font-size: 13px; min-width: 76px; }
+.map-value-num { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.map-value-range { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.map-flag { font-size: 12px; font-weight: 600; color: var(--ink); }
+.map-flag span { color: var(--warn); font-size: 10px; }
+.map-flag.act span { color: #ff8a8a; }
+.map-note { color: var(--muted); font-size: 12px; margin: auto 0 0; padding-top: 6px; }
+.map-figure { margin: 0 0 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+.map-figure svg { display: block; width: 100%; height: auto; }
+/* Below this the labels get too small to read; scroll the map, not the page. */
+@media (max-width: 800px) { .map-figure { overflow-x: auto; } .map-figure svg { min-width: 760px; } }
+.map-basin { fill: var(--panel-2); stroke: #3a4d74; stroke-width: 1.5; stroke-linejoin: round; }
+.map-river { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.map-river.wide { stroke-width: 6; }
+.map-river.downstream { opacity: 0.55; }
+.map-reservoir { fill: var(--accent); stroke: none; }
+.map-dam { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; }
+.map-plant { fill: var(--ink); opacity: 0.85; }
+.map-conduit { stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linecap: round; }
+.map-res-dot { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+.map-station { fill: var(--panel); stroke: var(--ink); stroke-width: 2.5; }
+.map-inset { fill: #121d33; stroke: var(--line); stroke-width: 1.5; }
+.map-inset-mark { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.map-zoom { stroke: var(--muted); stroke-width: 1; opacity: 0.5; }
+.map-scale { stroke: var(--ink); stroke-width: 3; }
+.map-north { fill: var(--ink); }
+.map-label { fill: var(--muted); font-size: 12px; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+.map-label.strong { fill: var(--ink); font-weight: 600; }
+.pin-disc { fill: var(--ink); stroke: var(--panel); stroke-width: 2.5; }
+.pin-num { fill: var(--bg); font-size: 13px; font-weight: 700; }
+
 .forecast-heading { margin: 4px 0 16px; }
 .forecast-heading h2 { margin: 0 0 4px; font-size: 19px; }
 .forecast-subhead { margin: 0; color: var(--muted); font-size: 13px; }

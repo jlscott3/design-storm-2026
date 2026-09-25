@@ -11,11 +11,13 @@ import SourceComparison from './components/SourceComparison.jsx'
 import LiveBadge from './components/LiveBadge.jsx'
 import DataTerms from './components/DataTerms.jsx'
 import LiveForecast from './components/LiveForecast.jsx'
+import RiverMap from './components/RiverMap.jsx'
 
 const TARGET_COLORS = { toc: '#ffb454', alk: '#4ecab0' }
 
 const TABS = [
   { id: 'forecast', label: 'Live forecast' },
+  { id: 'map', label: 'River map' },
   { id: 'explorer', label: 'Explorer' },
 ]
 
@@ -61,6 +63,7 @@ export default function App() {
         {error && <p className="error">Could not load data: {error}</p>}
         {!doc && !error && <p className="placeholder">Loading bundled data…</p>}
         {doc && tab === 'forecast' && <LiveForecast doc={doc} />}
+        {doc && tab === 'map' && <RiverMap doc={doc} />}
         {doc && tab === 'explorer' && <PredictionView doc={doc} />}
       </main>
 

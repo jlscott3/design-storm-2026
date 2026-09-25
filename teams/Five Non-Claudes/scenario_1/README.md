@@ -5,7 +5,7 @@ app that predicts TOC and alkalinity arriving at Denver Water's Foothills treatm
 plant from upstream signals. The model is a single-feature linear regression fitted
 **live in the browser**.
 
-The app has two tabs:
+The app has three tabs:
 
 - **Live forecast** — the operator-facing view. It pulls *current* upstream conditions
   from public feeds, forecasts TOC and alkalinity for the next 1-7 days, checks each
@@ -13,12 +13,23 @@ The app has two tabs:
   answers the sketch's two questions ("do I need to change chemicals / request an
   upstream change?") descriptively — it never prescribes dosing, which stays the
   operator's call.
+- **River map** — the same live forecast told as stops on a map of the South Platte:
+  early signs at the headwaters (Hoosier Pass snowpack, Trumbull flow), what arrives
+  at the plant in 4 and in 2 days, and today's estimate beside the last lab sample.
+  Numbered cards match numbered pins; a pin marks where that stop's readings are
+  taken, not a travel time. It uses the Live forecast's models and live feeds
+  (`src/lib/useLiveInputs.js`, `src/lib/riverOutlook.js`), so the two tabs always
+  agree. The map geometry is generated once by `python3 precompute_map.py` from the
+  basin and river lines in `../../../strontia-brief/` (USGS NLDI) and the reservoir,
+  dam and plant outlines in `geo/osm-strontia-foothills.json` (OpenStreetMap,
+  fetched 2026-09-25). Conduit 26 is not in OpenStreetMap, so it is drawn as a
+  straight dashed line.
 - **Explorer** — the analysis view. Pick a target, a feature, and a lead time (lag)
   and watch the model re-fit and re-score against the historical lab values, so you
   can judge which signals and lead times actually predict well. Includes the
   upstream-gage-vs-Strontia-sonde comparison.
 
-### Live data sources (keyless, CORS-open)
+## Live data sources (keyless, CORS-open)
 
 The Live forecast tab fetches these in the browser; each falls back to the last
 archived value if offline:
