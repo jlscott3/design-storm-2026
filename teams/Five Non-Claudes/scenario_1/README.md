@@ -29,7 +29,7 @@ The app has three tabs:
   can judge which signals and lead times actually predict well. Includes the
   upstream-gage-vs-Strontia-sonde comparison.
 
-### Live data sources (keyless, CORS-open)
+## Live data sources (keyless, CORS-open)
 
 The Live forecast tab fetches these in the browser; each falls back to the last
 archived value if offline:
@@ -40,11 +40,13 @@ archived value if offline:
 | Streamflow | USGS IV, gage 06701900 (param 00060 — the WQ gage publishes no flow) |
 | Snowpack SWE | NRCS SNOTEL, Hoosier Pass (531:CO:SNTL, WTEQ) |
 
-### Thresholds
+## Thresholds
 
 Adjustable in the Live forecast tab. Defaults: TOC ≥ 3 mg/L (a demo "elevated" cutoff,
-not a regulatory limit) and alkalinity ≤ 60 mg/L (Jake's low-alkalinity line). Denver
-Water's own guide questions whether 60 is the number operators act on, so it's editable.
+not a regulatory limit) and alkalinity ≤ 60 mg/L. Jake and Cassidi confirmed 60 is the
+regulatory line where the required TOC removal changes, and that operators aim for
+alkalinity between 50 and 80 (see [`cassidi-qa-notes.md`](../cassidi-qa-notes.md)).
+It stays editable so the demo can show the effect of a different cutoff.
 
 ## Stack
 
@@ -126,8 +128,8 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
    operating threshold. The card says, in plain language, whether and when we cross it —
    that's the heads-up an operator wants. It describes what's coming; it doesn't tell
    them what to dose."
-4. Nudge a threshold. "Denver Water asks whether 60 is really the number they act on —
-   so it's adjustable, and the recommendation updates."
+4. Nudge a threshold. "60 is where the regulation changes how much TOC they must
+   remove. The threshold is adjustable, and the recommendation updates."
 
 **Explorer tab (how good is the model, really):**
 
