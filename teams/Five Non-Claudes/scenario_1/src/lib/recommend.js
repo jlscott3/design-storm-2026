@@ -131,3 +131,20 @@ export function assessBanded(points, band) {
       `(closest ${closest.predicted.toFixed(2)} on ${closest.date}).`,
   }
 }
+
+// A week's forecast that moves less than this fraction of its start is called flat,
+// so noise between horizon models doesn't draw an arrow.
+const FLAT_FRACTION = 0.01
+
+/**
+ * Which way the forecast heads across the window, first horizon to last. Direction
+ * only: whether that direction is good or bad is the threshold's call, not this one.
+ * @returns {{ dir:'up'|'down'|'flat', from:number, to:number } | null}
+ */
+export function trend(points) {
+  if (!points || points.length < 2) return null
+  const from = points[0].predicted
+  const to = points[points.length - 1].predicted
+  const dir = Math.abs(to - from) < Math.abs(from) * FLAT_FRACTION ? 'flat' : to > from ? 'up' : 'down'
+  return { dir, from, to }
+}

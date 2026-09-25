@@ -25,6 +25,20 @@ export default function App() {
   const [doc, setDoc] = useState(null)
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('forecast')
+  // Set when a link on one tab points at a section on another; scrolled to once
+  // that tab has rendered.
+  const [scrollTo, setScrollTo] = useState(null)
+
+  useEffect(() => {
+    if (!scrollTo) return
+    document.getElementById(scrollTo)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setScrollTo(null)
+  }, [tab, scrollTo])
+
+  const openSondeProfile = () => {
+    setTab('map')
+    setScrollTo('sonde-title')
+  }
 
   useEffect(() => {
     loadSeries()
@@ -62,7 +76,7 @@ export default function App() {
       <main className="app-main">
         {error && <p className="error">Could not load data: {error}</p>}
         {!doc && !error && <p className="placeholder">Loading bundled data…</p>}
-        {doc && tab === 'forecast' && <LiveForecast doc={doc} />}
+        {doc && tab === 'forecast' && <LiveForecast doc={doc} onOpenSondeProfile={openSondeProfile} />}
         {doc && tab === 'map' && <RiverMap doc={doc} />}
         {doc && tab === 'explorer' && <PredictionView doc={doc} />}
       </main>
