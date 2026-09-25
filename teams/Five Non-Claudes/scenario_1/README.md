@@ -29,16 +29,18 @@ archived value if offline:
 | Streamflow | USGS IV, gage 06701900 (param 00060 — the WQ gage publishes no flow) |
 | Snowpack SWE | NRCS SNOTEL, Hoosier Pass (531:CO:SNTL, WTEQ) |
 
-### Mock alum dose (illustrative, NOT a real calculation)
+### Mock aluminum sulfate — Al₂(SO₄)₃ — dose (illustrative, NOT a real calculation)
 
 Its own section above the forecast (it's a "what to do now" recommendation), tagged
 "MOCK" with the full caveat in a tooltip on that tag. We have no dosing formula. It is
 a deliberately transparent toy relation anchored to one unverified example from the
-Denver Water Q&A (≈3 mg/L TOC → ≈11 alum): about 3.7 mg/L alum per mg/L of forecast
-TOC, nudged up when forecast alkalinity is below the watch line (low alkalinity needs
-more coagulant to hold pH in the floc range). It moves with the forecast for demo
-purposes but is not calibrated and must not be read as guidance. The real thing it
-gestures at is Denver Water's operator Excel sheet, which we did not have.
+Denver Water Q&A (≈3 mg/L TOC → ≈11 dose units): about 3.7 mg/L Al₂(SO₄)₃ per mg/L of
+forecast TOC, nudged up when forecast alkalinity is below the watch line (low
+alkalinity needs more coagulant to hold pH in the floc range). It moves with the
+forecast for demo purposes but is not calibrated and must not be read as guidance. The
+real thing it gestures at is Denver Water's operator Excel sheet, which we did not
+have. (The Q&A notes use the operators' shorthand "alum"; the compound is aluminum
+sulfate, Al₂(SO₄)₃.)
 
 ### Thresholds
 
@@ -135,7 +137,7 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
    60 and an act line at 50 — below 50 the water gets materially harder to treat. The
    card escalates from 'watch' to 'act' as the forecast crosses each. And because
    Denver Water asks whether 60 is really their number, all of these are adjustable."
-5. Point at the MOCK alum dose, and say the quiet part out loud. "This dose is a
+5. Point at the MOCK aluminum sulfate dose, and say the quiet part out loud. "This dose is a
    placeholder — we don't have their formula. It's anchored to one example from the
    Q&A and moves with the forecast, but it's labeled MOCK for a reason. The real
    version wraps their operator spreadsheet, which is exactly the plug-and-play tool

@@ -13,9 +13,9 @@ describe('RecommendationCard', () => {
     expect(screen.getByTestId('reco-card').textContent).toMatch(/decisions stay with the operator/i)
   })
 
-  it('no longer contains the alum dose (moved to its own card)', () => {
+  it('no longer contains the dose (moved to its own card)', () => {
     render(<RecommendationCard toc={toc} alk={alk} />)
     expect(screen.queryByTestId('dose-card')).toBeNull()
-    expect(screen.getByTestId('reco-card').textContent).not.toMatch(/alum/i)
+    expect(screen.getByTestId('reco-card').textContent).not.toMatch(/sulfate/i)
   })
 })

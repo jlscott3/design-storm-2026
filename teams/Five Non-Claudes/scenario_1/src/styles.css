@@ -352,3 +352,7 @@ select {
 .dose-unit { font-size: 13px; color: var(--muted); }
 .dose-grams { font-size: 13px; color: var(--muted); }
 .dose-basis { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.forecast-heading { margin: 4px 0 16px; }
+.forecast-heading h2 { margin: 0 0 4px; font-size: 19px; }
+.forecast-subhead { margin: 0; color: var(--muted); font-size: 13px; }

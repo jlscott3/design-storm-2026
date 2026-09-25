@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import DoseCard from './DoseCard.jsx'
 
 describe('DoseCard', () => {
-  it('shows the mock alum dose with the disclaimer in a tooltip on the MOCK tag', () => {
+  it('shows the mock aluminum sulfate dose with the disclaimer in a tooltip on the MOCK tag', () => {
     const dose = { rateMgL: 11, grams: 0.011, basis: 3, lowAlkBump: 0 }
     render(<DoseCard dose={dose} />)
     const card = screen.getByTestId('dose-card')

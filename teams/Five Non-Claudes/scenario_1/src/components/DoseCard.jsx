@@ -1,14 +1,14 @@
 import React from 'react'
 
 const MOCK_DISCLAIMER =
-  'Illustrative only. Anchored to one unverified example (≈3 mg/L TOC → ≈11 alum) ' +
-  'from the Denver Water Q&A; not a calibrated formula and not a real dose.'
+  'Illustrative only. Anchored to one unverified example (≈3 mg/L TOC → ≈11 dose ' +
+  'units) from the Denver Water Q&A; not a calibrated formula and not a real dose.'
 
 /**
- * MOCK aluminium sulfate (alum) dose — the "what to do now" recommendation, shown as
- * its own section above the forecast. This is NOT a real dosing calculation: it is a
- * toy relation anchored to a single unverified example from the Denver Water Q&A. The
- * full caveat lives in a tooltip on the MOCK tag to keep the dashboard uncluttered.
+ * MOCK aluminum sulfate — Al2(SO4)3 — dose. The "what to do now" recommendation, shown
+ * as its own section above the forecast. This is NOT a real dosing calculation: it is
+ * a toy relation anchored to a single unverified example from the Denver Water Q&A.
+ * The full caveat lives in a tooltip on the MOCK tag to keep the dashboard uncluttered.
  *
  * @param {object} props
  * @param {{rateMgL:number, grams:number, basis:number, lowAlkBump:number}|null} props.dose
@@ -20,7 +20,9 @@ export default function DoseCard({ dose }) {
         <span className="mock-tag" title={MOCK_DISCLAIMER} tabIndex={0} aria-label={MOCK_DISCLAIMER}>
           MOCK
         </span>
-        <span className="dose-title">Recommended now · aluminium sulfate (alum) dose</span>
+        <span className="dose-title">
+          Recommended now · aluminum sulfate Al₂(SO₄)₃ dose
+        </span>
       </div>
       {dose ? (
         <>
@@ -29,7 +31,7 @@ export default function DoseCard({ dose }) {
             <span className="dose-grams"> (≈ {dose.grams.toFixed(3)} g per L)</span>
           </div>
           <div className="dose-basis">
-            toy relation: {'~'}3.7 mg/L alum per mg/L forecast TOC (basis{' '}
+            toy relation: {'~'}3.7 mg/L Al₂(SO₄)₃ per mg/L forecast TOC (basis{' '}
             {dose.basis.toFixed(2)} mg/L TOC)
             {dose.lowAlkBump > 0
               ? `, +${Math.round(dose.lowAlkBump * 100)}% for low alkalinity`
