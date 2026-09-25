@@ -36,7 +36,8 @@ function Value({ label, f, digits, threshold }) {
 
 /**
  * The River map tab: what is coming down the South Platte, told as stops on a map.
- * Numbered cards match numbered pins; a pin marks where that stop's readings are
+ * Cards run left to right from today to furthest ahead; numbered cards match
+ * numbered pins; a pin marks where that stop's readings are
  * taken, not how far the water has travelled.
  */
 export default function RiverMap({ doc, fetchImpl }) {
@@ -44,7 +45,7 @@ export default function RiverMap({ doc, fetchImpl }) {
   const { loading, resolved } = useLiveInputs(series, fetchImpl)
   const thresholds = DEFAULT_THRESHOLDS
   const outlook = useMemo(() => riverOutlook(series, resolved, thresholds), [series, resolved, thresholds])
-  const [in4, in2] = outlook.ahead
+  const [in2, in4] = outlook.ahead
   const { estimate, lastLab } = outlook.today
 
   return (
@@ -52,23 +53,18 @@ export default function RiverMap({ doc, fetchImpl }) {
       {loading && <p className="placeholder">Fetching current upstream conditions…</p>}
 
       <div className="map-cards">
-        <article className="map-card" aria-labelledby="stop-1">
-          <div className="map-card-head"><Badge n="1" /><span className="map-chip">Early signs</span></div>
-          <h3 id="stop-1">Headwaters</h3>
-          <div className="map-row">
-            <span>Snowpack at Hoosier Pass</span>
-            <strong>{outlook.early.swe.value != null ? `${outlook.early.swe.value.toFixed(1)} in` : '—'}</strong>
-          </div>
-          <div className="map-src">{sourceText(outlook.early.swe)}</div>
-          <div className="map-row">
-            <span>Flow at Trumbull</span>
-            <strong>{outlook.early.flow.value != null ? `${Math.round(outlook.early.flow.value)} cfs` : '—'}</strong>
-          </div>
-          <div className="map-src">{sourceText(outlook.early.flow)}</div>
-          <p className="map-note">No forecast reaches this far. A heads-up only.</p>
+        <article className="map-card map-card-today" aria-labelledby="stop-1">
+          <div className="map-card-head"><Badge n="1" /><span className="map-chip map-chip-today">Today</span></div>
+          <h3 id="stop-1">Foothills Plant</h3>
+          <Value label="TOC" f={estimate.toc} digits={1} threshold={thresholds.toc} />
+          <Value label="Alkalinity" f={estimate.alk} digits={0} threshold={thresholds.alk} />
+          <p className="map-note">
+            Estimated from today's gage readings; no lab result yet.
+            {lastLab && ` Last lab sample ${dayLabel(lastLab.t)}: TOC ${lastLab.toc} mg/L, alkalinity ${lastLab.alk} mg/L.`}
+          </p>
         </article>
 
-        {[{ n: '2', f: in4 }, { n: '3', f: in2 }].map(({ n, f }) => (
+        {[{ n: '2', f: in2 }, { n: '3', f: in4 }].map(({ n, f }) => (
           <article className="map-card" aria-labelledby={`stop-${n}`} key={n}>
             <div className="map-card-head">
               <Badge n={n} />
@@ -82,16 +78,23 @@ export default function RiverMap({ doc, fetchImpl }) {
           </article>
         ))}
 
-        <article className="map-card map-card-today" aria-labelledby="stop-4">
-          <div className="map-card-head"><Badge n="4" /><span className="map-chip map-chip-today">Today</span></div>
-          <h3 id="stop-4">Foothills Plant</h3>
-          <Value label="TOC" f={estimate.toc} digits={1} threshold={thresholds.toc} />
-          <Value label="Alkalinity" f={estimate.alk} digits={0} threshold={thresholds.alk} />
-          <p className="map-note">
-            Estimated from today's gage readings; no lab result yet.
-            {lastLab && ` Last lab sample ${dayLabel(lastLab.t)}: TOC ${lastLab.toc} mg/L, alkalinity ${lastLab.alk} mg/L.`}
-          </p>
+
+        <article className="map-card" aria-labelledby="stop-4">
+          <div className="map-card-head"><Badge n="4" /><span className="map-chip">Early signs</span></div>
+          <h3 id="stop-4">Headwaters</h3>
+          <div className="map-row">
+            <span>Snowpack at Hoosier Pass</span>
+            <strong>{outlook.early.swe.value != null ? `${outlook.early.swe.value.toFixed(1)} in` : '—'}</strong>
+          </div>
+          <div className="map-src">{sourceText(outlook.early.swe)}</div>
+          <div className="map-row">
+            <span>Flow at Trumbull</span>
+            <strong>{outlook.early.flow.value != null ? `${Math.round(outlook.early.flow.value)} cfs` : '—'}</strong>
+          </div>
+          <div className="map-src">{sourceText(outlook.early.flow)}</div>
+          <p className="map-note">No forecast reaches this far. A heads-up only.</p>
         </article>
+
       </div>
 
       <MapFigure />
@@ -136,7 +139,7 @@ function MapFigure() {
       <svg
         viewBox={geo.viewBox.join(' ')}
         role="img"
-        aria-label="Map of the South Platte basin above Strontia Springs, with an enlarged view from the reservoir to the Foothills plant. Pin 1 is Hoosier Pass; pins 2 and 3 are the gage above Strontia Springs; pin 4 is the Foothills plant."
+        aria-label="Map of the South Platte basin above Strontia Springs, with an enlarged view from the reservoir to the Foothills plant. Pin 1 is the Foothills plant; pins 2 and 3 are the gage above Strontia Springs; pin 4 is Hoosier Pass."
       >
         <defs>
           <clipPath id="river-inset-clip"><rect x={ix} y={iy} width={iw} height={ih} rx="14" /></clipPath>
@@ -153,7 +156,7 @@ function MapFigure() {
         <Label x={m.antero[0] + 9} y={m.antero[1] + 4}>Antero</Label>
         <circle cx={m.trumbull[0]} cy={m.trumbull[1]} r="5" className="map-station" />
         <Label x={m.trumbull[0] - 9} y={m.trumbull[1] + 18} anchor="end">Flow gage (Trumbull)</Label>
-        <Pin x={m.hoosier[0]} y={m.hoosier[1]} n="1" />
+        <Pin x={m.hoosier[0]} y={m.hoosier[1]} n="4" />
         <Label x={m.hoosier[0] + 18} y={m.hoosier[1] + 4} strong>Hoosier Pass snow station</Label>
 
         <rect x={bx0} y={by0} width={bx1 - bx0} height={by1 - by0} rx="3" className="map-inset-mark" />
@@ -188,7 +191,7 @@ function MapFigure() {
         <circle cx={p.gage[0]} cy={p.gage[1]} r="5" className="map-station" />
         <Pin x={p.gage[0]} y={p.gage[1]} n="2" dx={-15} dy={-26} />
         <Pin x={p.gage[0]} y={p.gage[1]} n="3" dx={15} dy={-26} />
-        <Pin x={pb[2]} y={(pb[1] + pb[3]) / 2} n="4" dx={20} dy={0} />
+        <Pin x={pb[2]} y={(pb[1] + pb[3]) / 2} n="1" dx={20} dy={0} />
         <g transform={`translate(${ix + 20} ${iy + ih - 44})`}>
           <line x1="0" y1="0" x2={2 * inset.pxPerKm} y2="0" className="map-scale" />
           <Label x={0} y={-8}>2 km</Label>

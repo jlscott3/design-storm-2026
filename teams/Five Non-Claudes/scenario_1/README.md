@@ -14,9 +14,9 @@ The app has three tabs:
   upstream change?") descriptively — it never prescribes dosing, which stays the
   operator's call.
 - **River map** — the same live forecast told as stops on a map of the South Platte:
-  early signs at the headwaters (Hoosier Pass snowpack, Trumbull flow), what arrives
-  at the plant in 4 and in 2 days, and today's estimate beside the last lab sample.
-  Numbered cards match numbered pins; a pin marks where that stop's readings are
+  read left to right from today to furthest ahead: today's estimate beside the last
+  lab sample, what arrives at the plant in 2 and in 4 days, then early signs at the
+  headwaters (Hoosier Pass snowpack, Trumbull flow). Numbered cards match numbered pins; a pin marks where that stop's readings are
   taken, not a travel time. It uses the Live forecast's models and live feeds
   (`src/lib/useLiveInputs.js`, `src/lib/riverOutlook.js`), so the two tabs always
   agree. The map geometry is generated once by `python3 precompute_map.py` from the

@@ -5,9 +5,9 @@
 import { buildForecast } from './forecast.js'
 import { breaches } from './recommend.js'
 
-// The two forecast stops on the map. 2 days is TOC's own lag in Jake's notebooks
+// The two forecast stops on the map, nearest first. 2 days is TOC's own lag in Jake's notebooks
 // and 4 is alkalinity's; both targets are shown at both, as on the Live tab.
-export const MAP_HORIZONS = [4, 2]
+export const MAP_HORIZONS = [2, 4]
 
 /**
  * The most serious threshold line a value crosses, or null. TOC has one line
