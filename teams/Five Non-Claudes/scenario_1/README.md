@@ -62,7 +62,13 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
 - **Target**: TOC or alkalinity at the Foothills influent (the lab values).
 - **Feature**: for TOC, turbidity × flow (the "loading" term the guide flags as the
   strongest single TOC predictor); for alkalinity, specific conductance. Both are
-  selectable, along with a few others.
+  selectable, along with a few others — including the **Strontia profiling sonde**
+  (near-surface turbidity and conductivity), the closer-in sensor Cassidi starred.
+- **Upstream gage vs Strontia sonde**: a comparison card contrasts the two sources for
+  the current target. The upstream gage gives days of warning; the sonde sits at the
+  plant intake and gives hours. The sonde only covers one partial 2026 season, so the
+  card leads with that caveat rather than declaring a winner — the point is the
+  lead-time-vs-proximity trade, and that more sonde data is needed to judge it.
 - **Lead time (lag)**: the predictor is shifted forward N days, so the model learns
   "the river N days ago → the plant today". Defaults are 2 days for TOC, 4 for
   alkalinity, matching Jake's notebooks.
@@ -86,6 +92,10 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
    and a straight line explains about half the variation on its own."
 6. Gesture at the upstream-signals panel. "These are the things that arrive before the
    water does. The one outlined in blue is what's driving the prediction right now."
+7. Drop to the comparison card. "Cassidi starred one idea: the reservoir sonde, which
+   sits right at the plant intake. It should be a sharper signal — but it buys you
+   hours of warning instead of days, and we only have one partial season of it. So the
+   honest answer is 'promising, go collect more,' not 'it wins.'"
 
 ## Known limitations (honest for the booth)
 

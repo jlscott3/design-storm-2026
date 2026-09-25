@@ -71,6 +71,21 @@ export const FEATURES = {
     unit: 'in',
     build: (series) => series.swe,
   },
+  // Strontia profiling sonde, near-surface. Sits in the reservoir much closer to
+  // the Foothills influent than the upstream gage, so it may sharpen accuracy — but
+  // it only covers one partial 2026 season, so far fewer matched days.
+  sonde_turbidity: {
+    label: 'Turbidity (Strontia sonde)',
+    unit: 'NTU',
+    build: (series) => series.sonde_turbidity || [],
+    sonde: true,
+  },
+  sonde_conductivity: {
+    label: 'Conductivity (Strontia sonde)',
+    unit: 'µS/cm',
+    build: (series) => series.sonde_conductivity || [],
+    sonde: true,
+  },
 }
 
 export const TARGETS = {

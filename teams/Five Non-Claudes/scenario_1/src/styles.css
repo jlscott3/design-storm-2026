@@ -191,3 +191,40 @@ select {
 }
 .terms-body { margin-top: 10px; max-width: 70ch; }
 .terms-body code { color: var(--ink); }
+
+.source-compare {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.compare-cols { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+.compare-col {
+  flex: 1 1 200px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+}
+.compare-col.highlight { border-color: var(--toc); }
+
+.compare-col-title { font-weight: 600; }
+.compare-col-sub { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+
+.compare-metrics { margin: 0; }
+.compare-metric { display: flex; justify-content: space-between; padding: 3px 0; }
+.compare-metric dt { color: var(--muted); }
+.compare-metric dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+.compare-nodata { color: var(--muted); font-size: 13px; }
+
+.compare-caveat {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 12px 0 0;
+  max-width: 80ch;
+}
+.compare-caveat strong { color: var(--warn); }

@@ -32,6 +32,7 @@ def main():
     expected = {
         "toc", "alk", "turbidity", "conductance", "ph", "water_temp",
         "dissolved_oxygen", "flow", "swe", "precip", "snow", "air_tmax", "air_tmin",
+        "sonde_turbidity", "sonde_conductivity",
     }
     missing = expected - set(series)
     if missing:
@@ -66,6 +67,15 @@ def main():
     # Count sanity against the ~1,100 rows the guide describes.
     if not (1000 <= len(series["toc"]) <= 1200):
         fail(f"toc count {len(series['toc'])} outside expected ~1100 range")
+
+    # The sonde covers one partial 2026 season only: ~104 days, all in 2026-04..08,
+    # and no stray 1899 header row leaking through.
+    for name in ("sonde_turbidity", "sonde_conductivity"):
+        pts = series[name]
+        if not (80 <= len(pts) <= 130):
+            fail(f"{name} count {len(pts)} outside expected ~104 range")
+        if pts[0]["t"] < "2026-04-01" or pts[-1]["t"] > "2026-08-31":
+            fail(f"{name} spans {pts[0]['t']}..{pts[-1]['t']}, expected 2026-04..08 only")
 
     total = sum(len(v) for v in series.values())
     print(f"OK: {len(series)} series, {total} points, all dates ISO & sorted, "

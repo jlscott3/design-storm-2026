@@ -87,4 +87,23 @@ describe('pairedDataset', () => {
     const lag2 = pairedDataset(series, 'toc', 'turb_flow', 2)
     expect(lag1).not.toEqual(lag2)
   })
+
+  it('pairs a sonde feature against the target', () => {
+    const withSonde = {
+      ...series,
+      sonde_turbidity: [
+        { t: '2022-04-01', v: 5 },
+        { t: '2022-04-02', v: 6 },
+        { t: '2022-04-03', v: 7 },
+      ],
+    }
+    // lag 0: sonde 04-03=7 overlaps toc 04-03.
+    const pairs = pairedDataset(withSonde, 'toc', 'sonde_turbidity', 0)
+    expect(pairs).toEqual([{ t: '2022-04-03', x: 7, y: 2.5 }])
+  })
+
+  it('a sonde feature with no data yields no pairs', () => {
+    const pairs = pairedDataset(series, 'toc', 'sonde_turbidity', 0)
+    expect(pairs).toEqual([])
+  })
 })

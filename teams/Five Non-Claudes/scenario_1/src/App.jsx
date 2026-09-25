@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { loadSeries } from './lib/dataLayer.js'
 import { pairedDataset, TARGETS, FEATURES } from './lib/features.js'
 import { fitAndScore } from './lib/regression.js'
+import { compareSources } from './lib/compareSources.js'
 import Controls from './components/Controls.jsx'
 import PredictionChart from './components/PredictionChart.jsx'
 import ScorePanel from './components/ScorePanel.jsx'
 import PredictorPanel from './components/PredictorPanel.jsx'
+import SourceComparison from './components/SourceComparison.jsx'
 import LiveBadge from './components/LiveBadge.jsx'
 import DataTerms from './components/DataTerms.jsx'
 
@@ -64,6 +66,14 @@ export function PredictionView({ doc }) {
     return { pairs, ...fitAndScore(pairs) }
   }, [series, targetName, featureName, lag])
 
+  // The starred thread: upstream gage vs Strontia sonde for this target. Depends only
+  // on the target, not the current feature/lag, so it re-runs only when the target
+  // toggles.
+  const comparison = useMemo(
+    () => compareSources(series, targetName),
+    [series, targetName],
+  )
+
   const unit = _meta.units[targetName]
 
   // Share the prediction's date range with the predictor charts so all x-axes line
@@ -113,6 +123,7 @@ export function PredictionView({ doc }) {
           dateDomain={dateDomain}
         />
       </div>
+      <SourceComparison comparison={comparison} unit={unit} />
     </section>
   )
 }

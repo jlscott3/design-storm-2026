@@ -24,10 +24,16 @@ import csv
 import datetime as dt
 import json
 import os
+import re
+import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "..", "..", "data"))
 OUT = os.path.join(HERE, "public", "series.json")
+
+SONDE_FILE = "Strontia 0407_0819.xlsx"
+# Excel serial dates count days from this epoch (the 1900 system's 1899-12-30 anchor).
+EXCEL_EPOCH = dt.datetime(1899, 12, 30)
 
 
 def iso(date_str):
@@ -70,7 +76,72 @@ def read_series(filename, date_col, value_col):
     return rows
 
 
+def read_sonde_near_surface(filename):
+    """Reduce the Strontia profiling sonde .xlsx to daily near-surface readings.
+
+    The sonde logs a full-depth profile of the reservoir roughly twice a day: each
+    row is one reading with its own timestamp (Excel serial) and a depth ("Vertical
+    Position", column D). To get one value per day comparable to the daily target,
+    we take the SHALLOWEST reading of each day — the water nearest the surface, the
+    closest analog to what the plant intake draws.
+
+    Parsed with the standard library only (an .xlsx is a zip of XML), so no extra
+    dependency. Returns {"turbidity": [...], "conductivity": [...]} as {t, v} arrays.
+
+    Columns (1-indexed): A=timestamp, C=conductivity, D=vertical position (depth),
+    G=turbidity NTU.
+    """
+    path = os.path.join(DATA, filename)
+
+    def col_letter(ref):
+        return re.match(r"[A-Z]+", ref).group(0)
+
+    with zipfile.ZipFile(path) as z:
+        sheet = z.read("xl/worksheets/sheet1.xml").decode("utf-8")
+
+    # shallowest[day] = (depth, turbidity, conductivity) for the shallowest row so far
+    shallowest = {}
+    for row_xml in re.findall(r"<row[^>]*>(.*?)</row>", sheet, re.S):
+        cells = {}
+        has_string_cell = False
+        for attrs, inner in re.findall(r"<c([^>]*)>(.*?)</c>", row_xml, re.S):
+            ref = re.search(r'r="([A-Z]+\d+)"', attrs)
+            val = re.search(r"<v>(.*?)</v>", inner, re.S)
+            if re.search(r't="s"', attrs):
+                has_string_cell = True
+            if ref and val:
+                cells[col_letter(ref.group(1))] = val.group(1)
+        # The header row stores shared-string indexes (t="s"); data rows are all
+        # numeric. Skip any row carrying a string cell so the header can't slip
+        # through as a bogus 1899 date.
+        if has_string_cell:
+            continue
+        try:
+            serial = float(cells.get("A", ""))
+            depth = float(cells.get("D", ""))
+        except ValueError:
+            continue
+        turbidity = num(cells.get("G"))
+        conductivity = num(cells.get("C"))
+        day = (EXCEL_EPOCH + dt.timedelta(days=serial)).date().isoformat()
+        prev = shallowest.get(day)
+        if prev is None or depth < prev[0]:
+            shallowest[day] = (depth, turbidity, conductivity)
+
+    turb = sorted(
+        ({"t": d, "v": v[1]} for d, v in shallowest.items() if v[1] is not None),
+        key=lambda r: r["t"],
+    )
+    cond = sorted(
+        ({"t": d, "v": v[2]} for d, v in shallowest.items() if v[2] is not None),
+        key=lambda r: r["t"],
+    )
+    return {"turbidity": turb, "conductivity": cond}
+
+
 def main():
+    sonde = read_sonde_near_surface(SONDE_FILE)
+
     series = {
         # Target: what we are predicting, from Denver Water's own lab.
         "toc": read_series("FoothillsInfluent.csv", "DATE", "TOC_mg_L"),
@@ -90,6 +161,11 @@ def main():
         "snow": read_series("USC00058022.csv", "DATE", "SNOW"),
         "air_tmax": read_series("USC00058022.csv", "DATE", "TMAX"),
         "air_tmin": read_series("USC00058022.csv", "DATE", "TMIN"),
+        # Strontia profiling sonde, near-surface reading per day. Sits in the
+        # reservoir much closer to the Foothills influent than the upstream gage —
+        # potentially sharper, but only covers 2026-04-07..08-19 (one partial season).
+        "sonde_turbidity": sonde["turbidity"],
+        "sonde_conductivity": sonde["conductivity"],
     }
 
     meta = {
@@ -98,6 +174,7 @@ def main():
             "conductance": "uS/cm", "ph": "pH", "water_temp": "degC",
             "dissolved_oxygen": "mg/L", "flow": "cfs", "swe": "in",
             "precip": "in", "snow": "in", "air_tmax": "degF", "air_tmin": "degF",
+            "sonde_turbidity": "NTU", "sonde_conductivity": "uS/cm",
         },
         "labels": {
             "toc": "TOC (Foothills influent)",
@@ -113,6 +190,8 @@ def main():
             "snow": "Snowfall (NOAA)",
             "air_tmax": "Air temp max (NOAA)",
             "air_tmin": "Air temp min (NOAA)",
+            "sonde_turbidity": "Turbidity (Strontia sonde, near-surface)",
+            "sonde_conductivity": "Conductivity (Strontia sonde, near-surface)",
         },
         "sources": {
             "toc/alk": "FoothillsInfluent.csv (Denver Water lab)",
@@ -121,6 +200,9 @@ def main():
             "flow": "SouthPlatteFlow.csv, Colorado DWR",
             "swe": "HoosierPass.csv, USDA NRCS SNOTEL (MichiganCreek.csv omitted: known bad patch)",
             "precip/snow/air_tmax/air_tmin": "USC00058022.csv, NOAA GHCN Daily",
+            "sonde_turbidity/sonde_conductivity":
+                "Strontia 0407_0819.xlsx, Denver Water profiling sonde "
+                "(near-surface reading per day; 2026-04-07..08-19 only)",
         },
         "provisional_note": (
             "Water quality data is provisional and subject to change. USGS publishes "
