@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { bandAt, clearestLayer, murkyLayer, GATES, PRIMARY_GATE, gateBand, primaryGateCheck } from './sondeProfile.js'
+import { bandAt, clearestLayer, murkyLayer, GATES, PRIMARY_GATE, gateBand, primaryGateCheck, profileAgeDays } from './sondeProfile.js'
 
 const band = (top, med) => ({ top, bottom: top + 2, turbidity: [med * 0.8, med, med * 1.5] })
 // Shaped like the sonde's last week: clear at the top, a murky plume mid-column,
@@ -49,5 +49,13 @@ describe('intake gates', () => {
     // Slightly murkier than the top, but not a murky layer: 45 ft is their choice
     // for reasons beyond turbidity, so a small difference is not worth raising.
     expect(primaryGateCheck(column(false)).murky).toBe(false)
+  })
+})
+
+describe('profile age', () => {
+  it('counts calendar days from the last cast, so an old week is not shown as today', () => {
+    const profile = { from: '2026-08-12', to: '2026-08-19' }
+    expect(profileAgeDays(profile, new Date(2026, 8, 25, 11))).toBe(37)
+    expect(profileAgeDays(profile, new Date(2026, 7, 19, 23))).toBe(0)
   })
 })

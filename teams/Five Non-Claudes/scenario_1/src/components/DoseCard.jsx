@@ -5,15 +5,17 @@ const MOCK_DISCLAIMER =
   'units) from the Denver Water Q&A; not a calibrated formula and not a real dose.'
 
 /**
- * MOCK aluminum sulfate — Al2(SO4)3 — dose. The "what to do now" recommendation, shown
- * as its own section above the forecast. This is NOT a real dosing calculation: it is
+ * MOCK aluminum sulfate — Al2(SO4)3 — dose. The chemicals half of "Do today", above
+ * the forecast. This is NOT a real dosing calculation: it is
  * a toy relation anchored to a single unverified example from the Denver Water Q&A.
  * The full caveat lives in a tooltip on the MOCK tag to keep the dashboard uncluttered.
  *
  * @param {object} props
  * @param {{rateMgL:number, grams:number, basis:number, lowAlkBump:number}|null} props.dose
+ * @param {string} [props.alkLevel]  the alkalinity row's level, so the bump chip wears
+ *   the same colour as the forecast row that caused it
  */
-export default function DoseCard({ dose }) {
+export default function DoseCard({ dose, alkLevel = 'approaching' }) {
   return (
     <div className="dose-card" data-testid="dose-card">
       <div className="dose-head">
@@ -21,7 +23,7 @@ export default function DoseCard({ dose }) {
           MOCK
         </span>
         <span className="dose-title">
-          Recommended now · aluminum sulfate Al₂(SO₄)₃ dose
+          Aluminum sulfate Al₂(SO₄)₃ dose
         </span>
       </div>
       {dose ? (
@@ -33,10 +35,12 @@ export default function DoseCard({ dose }) {
           <div className="dose-basis">
             toy relation: {'~'}3.7 mg/L Al₂(SO₄)₃ per mg/L forecast TOC (basis{' '}
             {dose.basis.toFixed(2)} mg/L TOC)
-            {dose.lowAlkBump > 0
-              ? `, +${Math.round(dose.lowAlkBump * 100)}% for low alkalinity`
-              : ''}
           </div>
+          {dose.lowAlkBump > 0 && (
+            <span className="dose-driver" data-level={alkLevel}>
+              ↘ low alkalinity · +{Math.round(dose.lowAlkBump * 100)}%
+            </span>
+          )}
         </>
       ) : (
         <div className="dose-value">— (no TOC forecast)</div>

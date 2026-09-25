@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatFormula, formatR2, formatError } from './format.js'
+import { formatFormula, formatR2, formatError, formatWhen } from './format.js'
 
 describe('formatFormula', () => {
   it('renders target, feature, slope and intercept', () => {
@@ -22,5 +22,12 @@ describe('formatR2 / formatError', () => {
     expect(formatR2(NaN)).toBe('—')
     expect(formatError(6.26, 'mg/L')).toBe('6.26 mg/L')
     expect(formatError(NaN, 'mg/L')).toBe('—')
+  })
+})
+
+describe('formatWhen', () => {
+  it('says tomorrow for the first horizon and names the weekday', () => {
+    expect(formatWhen(1, '2026-09-26')).toBe('tomorrow (Sat)')
+    expect(formatWhen(3, '2026-09-28')).toBe('in 3 days (Mon)')
   })
 })

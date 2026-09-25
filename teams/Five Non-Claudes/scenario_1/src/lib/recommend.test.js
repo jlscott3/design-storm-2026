@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { breaches, assess, assessBanded, DEFAULT_THRESHOLDS } from './recommend.js'
+import { breaches, assess, assessBanded, trend, DEFAULT_THRESHOLDS } from './recommend.js'
 
 describe('breaches', () => {
   it('handles above and below directions', () => {
@@ -99,4 +99,21 @@ describe('assessBanded (alkalinity, two-tier below)', () => {
 
 it('handles an empty forecast (single threshold)', () => {
   expect(assess([], toc).message).toMatch(/No forecast/)
+})
+
+describe('trend', () => {
+  const pts = (...vs) => vs.map((v, i) => ({ horizon: i + 1, date: `2026-09-${26 + i}`, predicted: v }))
+
+  it('reports direction from the first horizon to the last', () => {
+    expect(trend(pts(61, 60, 58.7))).toEqual({ dir: 'down', from: 61, to: 58.7 })
+    expect(trend(pts(2.6, 2.7, 2.9)).dir).toBe('up')
+  })
+
+  it('calls a sub-1% wobble flat, so noise does not draw an arrow', () => {
+    expect(trend(pts(60, 60.4, 60.3)).dir).toBe('flat')
+  })
+
+  it('has nothing to say without at least two points', () => {
+    expect(trend(pts(3))).toBeNull()
+  })
 })

@@ -39,3 +39,11 @@ export function formatError(value, unit) {
   if (Number.isNaN(value)) return '—'
   return `${value.toFixed(2)}${unit ? ' ' + unit : ''}`
 }
+
+const WEEKDAY = { weekday: 'short', timeZone: 'UTC' }
+
+/** When a forecast horizon lands, for people: "tomorrow (Sat)", "in 3 days (Mon)". */
+export function formatWhen(horizon, isoDate) {
+  const day = new Date(isoDate + 'T00:00:00Z').toLocaleDateString('en-US', WEEKDAY)
+  return horizon === 1 ? `tomorrow (${day})` : `in ${horizon} days (${day})`
+}

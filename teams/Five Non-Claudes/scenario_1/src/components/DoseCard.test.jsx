@@ -17,6 +17,18 @@ describe('DoseCard', () => {
     expect(card.textContent).not.toMatch(/not a calibrated formula/i)
   })
 
+  it('ties a low-alkalinity bump to the alkalinity forecast with a matching chip', () => {
+    const dose = { rateMgL: 9.7, grams: 0.01, basis: 2.64, lowAlkBump: 0.01 }
+    render(<DoseCard dose={dose} alkLevel="approaching" />)
+    const chip = screen.getByText(/low alkalinity · \+1%/)
+    expect(chip).toHaveAttribute('data-level', 'approaching')
+  })
+
+  it('shows no alkalinity chip when there is no bump', () => {
+    render(<DoseCard dose={{ rateMgL: 11, grams: 0.011, basis: 3, lowAlkBump: 0 }} />)
+    expect(screen.queryByText(/low alkalinity/)).toBeNull()
+  })
+
   it('handles a missing dose gracefully', () => {
     render(<DoseCard dose={null} />)
     expect(screen.getByTestId('dose-card').textContent).toMatch(/no TOC forecast/i)

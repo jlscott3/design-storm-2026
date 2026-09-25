@@ -89,3 +89,14 @@ export function primaryGateCheck(bands) {
     clearestTurbidity: median(gateBand(bands, clearest)),
   }
 }
+
+// The sonde is not a live feed. Past this many days, its week of casts says what the
+// reservoir was like, not what it is like today.
+export const STALE_DAYS = 2
+
+/** Whole days from the profile's last cast to `now`'s local calendar day. */
+export function profileAgeDays(profile, now = new Date()) {
+  const last = Date.parse(profile.to + 'T00:00:00Z')
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  return Math.round((today - last) / 86400000)
+}
