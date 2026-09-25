@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { fetchLiveInputs } from '../lib/liveInputs.js'
-import { resolveCurrent, resolveCurrentTurbFlow } from '../lib/currentInput.js'
+import React, { useMemo, useState } from 'react'
+import { useLiveInputs } from '../lib/useLiveInputs.js'
 import { buildForecast } from '../lib/forecast.js'
 import { assess, DEFAULT_THRESHOLDS } from '../lib/recommend.js'
 import { TARGETS } from '../lib/features.js'
@@ -20,34 +19,8 @@ const TARGET_COLORS = { toc: '#ffb454', alk: '#4ecab0' }
  */
 export default function LiveForecast({ doc, fetchImpl }) {
   const { series } = doc
-  const [live, setLive] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const { loading, resolved } = useLiveInputs(series, fetchImpl)
   const [thresholds, setThresholds] = useState(DEFAULT_THRESHOLDS)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    fetchLiveInputs(fetchImpl).then((inputs) => {
-      if (cancelled) return
-      setLive(inputs)
-      setLoading(false)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [fetchImpl])
-
-  // Resolve current inputs (live or bundled fallback). turb_flow drives TOC;
-  // conductance drives alkalinity — mirroring the model's default features.
-  const resolved = useMemo(() => {
-    return {
-      turbidity: resolveCurrent(live?.turbidity, series.turbidity),
-      flow: resolveCurrent(live?.flow, series.flow),
-      conductance: resolveCurrent(live?.conductance, series.conductance),
-      swe: resolveCurrent(live?.swe, series.swe),
-      turb_flow: resolveCurrentTurbFlow(live, series),
-    }
-  }, [live, series])
 
   const forecasts = useMemo(() => {
     const toc = buildForecast(series, 'toc', 'turb_flow', resolved.turb_flow.value)

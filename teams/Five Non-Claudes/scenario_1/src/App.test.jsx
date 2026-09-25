@@ -21,9 +21,11 @@ describe('App offline resilience', () => {
     )
   })
 
-  it('shows both tabs with Live forecast selected by default', async () => {
+  it('shows the tabs in order with Live forecast selected by default', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'))
     render(<App />)
+    const tabs = screen.getAllByRole('tab').map((t) => t.textContent)
+    expect(tabs).toEqual(['Live forecast', 'River map', 'Explorer'])
     const forecastTab = screen.getByRole('tab', { name: 'Live forecast' })
     const explorerTab = screen.getByRole('tab', { name: 'Explorer' })
     expect(forecastTab).toHaveAttribute('aria-selected', 'true')
