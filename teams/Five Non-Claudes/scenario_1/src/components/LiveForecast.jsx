@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { fetchLiveInputs } from '../lib/liveInputs.js'
 import { resolveCurrent, resolveCurrentTurbFlow } from '../lib/currentInput.js'
 import { buildForecast } from '../lib/forecast.js'
-import { assess, DEFAULT_THRESHOLDS } from '../lib/recommend.js'
+import { assess, assessBanded, DEFAULT_THRESHOLDS } from '../lib/recommend.js'
 import { TARGETS } from '../lib/features.js'
 import RecommendationCard from './RecommendationCard.jsx'
 import CurrentInputs from './CurrentInputs.jsx'
@@ -56,10 +56,11 @@ export default function LiveForecast({ doc, fetchImpl }) {
   }, [series, resolved])
 
   const tocAssess = assess(forecasts.toc.points, thresholds.toc)
-  const alkAssess = assess(forecasts.alk.points, thresholds.alk)
+  const alkAssess = assessBanded(forecasts.alk.points, thresholds.alk)
 
-  const handleThreshold = (target, value) =>
-    setThresholds((t) => ({ ...t, [target]: { ...t[target], value } }))
+  // TOC has one threshold field ('value'); alkalinity has two ('watch', 'act').
+  const handleThreshold = (target, key, value) =>
+    setThresholds((t) => ({ ...t, [target]: { ...t[target], [key]: value } }))
 
   return (
     <section className="live-forecast">
@@ -74,16 +75,17 @@ export default function LiveForecast({ doc, fetchImpl }) {
       <div className="forecast-grid">
         <ForecastChart
           points={forecasts.toc.points}
-          threshold={thresholds.toc.value}
-          direction={thresholds.toc.direction}
+          thresholds={[{ value: thresholds.toc.value, label: 'threshold', color: '#ff8a8a' }]}
           color={TARGET_COLORS.toc}
           unit="mg/L"
           label={TARGETS.toc.label}
         />
         <ForecastChart
           points={forecasts.alk.points}
-          threshold={thresholds.alk.value}
-          direction={thresholds.alk.direction}
+          thresholds={[
+            { value: thresholds.alk.watch, label: 'watch', color: '#ffd27a' },
+            { value: thresholds.alk.act, label: 'act', color: '#ff8a8a' },
+          ]}
           color={TARGET_COLORS.alk}
           unit="mg/L"
           label={TARGETS.alk.label}

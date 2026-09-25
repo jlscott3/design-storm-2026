@@ -31,9 +31,15 @@ archived value if offline:
 
 ### Thresholds
 
-Adjustable in the Live forecast tab. Defaults: TOC ≥ 3 mg/L (a demo "elevated" cutoff,
-not a regulatory limit) and alkalinity ≤ 60 mg/L (Jake's low-alkalinity line). Denver
-Water's own guide questions whether 60 is the number operators act on, so it's editable.
+Adjustable in the Live forecast tab.
+
+- **TOC**: a single line, default ≥ 3 mg/L (a demo "elevated" cutoff, not a regulatory
+  limit).
+- **Alkalinity**: a two-tier band. A **watch** line at 60 mg/L (Jake's low-alkalinity
+  line — Denver Water questions whether 60 is the acting number, so it's editable) and
+  a firmer **act** line at 50 mg/L, below which the water becomes materially harder to
+  treat. The recommendation escalates from "watch" to "act" as the forecast crosses
+  each; the forecast chart draws both lines.
 
 ## Stack
 
@@ -115,8 +121,10 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
    operating threshold. The card says, in plain language, whether and when we cross it —
    that's the heads-up an operator wants. It describes what's coming; it doesn't tell
    them what to dose."
-4. Nudge a threshold. "Denver Water asks whether 60 is really the number they act on —
-   so it's adjustable, and the recommendation updates."
+4. Point at the alkalinity chart's two lines. "Alkalinity has a band: a watch line at
+   60 and an act line at 50 — below 50 the water gets materially harder to treat. The
+   card escalates from 'watch' to 'act' as the forecast crosses each. And because
+   Denver Water asks whether 60 is really their number, all of these are adjustable."
 
 **Explorer tab (how good is the model, really):**
 

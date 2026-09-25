@@ -18,16 +18,14 @@ import {
  *
  * @param {object} props
  * @param {{horizon:number, date:string, predicted:number, rmse:number}[]} props.points
- * @param {number} props.threshold
- * @param {'above'|'below'} props.direction
+ * @param {{value:number, label:string, color?:string}[]} props.thresholds  one or more guideline lines
  * @param {string} props.color
  * @param {string} props.unit
  * @param {string} props.label
  */
 export default function ForecastChart({
   points,
-  threshold,
-  direction,
+  thresholds = [],
   color = '#ffb454',
   unit,
   label,
@@ -63,17 +61,20 @@ export default function ForecastChart({
                 return [Number(value).toFixed(2), name]
               }}
             />
-            <ReferenceLine
-              y={threshold}
-              stroke="#ff8a8a"
-              strokeDasharray="5 4"
-              label={{
-                value: `threshold ${threshold}`,
-                fill: '#ff8a8a',
-                fontSize: 11,
-                position: 'insideTopRight',
-              }}
-            />
+            {thresholds.map((th, i) => (
+              <ReferenceLine
+                key={th.label ?? i}
+                y={th.value}
+                stroke={th.color || '#ff8a8a'}
+                strokeDasharray="5 4"
+                label={{
+                  value: `${th.label ? th.label + ' ' : ''}${th.value}`,
+                  fill: th.color || '#ff8a8a',
+                  fontSize: 11,
+                  position: 'insideTopRight',
+                }}
+              />
+            ))}
             <Area
               dataKey="band"
               stroke="none"

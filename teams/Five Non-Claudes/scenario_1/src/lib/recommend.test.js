@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { breaches, assess, DEFAULT_THRESHOLDS } from './recommend.js'
+import { breaches, assess, assessBanded, DEFAULT_THRESHOLDS } from './recommend.js'
 
 describe('breaches', () => {
   it('handles above and below directions', () => {
@@ -47,18 +47,56 @@ describe('assess (TOC, above)', () => {
   })
 })
 
-describe('assess (alkalinity, below)', () => {
-  it('detects dropping below the low threshold', () => {
+describe('assessBanded (alkalinity, two-tier below)', () => {
+  it('has watch=60 and act=50 defaults', () => {
+    expect(alk.watch).toBe(60)
+    expect(alk.act).toBe(50)
+    expect(alk.direction).toBe('below')
+  })
+
+  it('watch level when it dips below 60 but stays above 50', () => {
     const points = [
       { horizon: 1, date: '2026-09-26', predicted: 64 },
-      { horizon: 2, date: '2026-09-27', predicted: 59 },
+      { horizon: 2, date: '2026-09-27', predicted: 58 },
+      { horizon: 3, date: '2026-09-28', predicted: 55 },
     ]
-    const r = assess(points, alk)
+    const r = assessBanded(points, alk)
+    expect(r.level).toBe('approaching')
     expect(r.firstBreachHorizon).toBe(2)
-    expect(r.message).toMatch(/crosses below the 60 threshold/)
+    expect(r.message).toMatch(/crosses below the 60 watch line/)
+    expect(r.message).toMatch(/above the 50 act line/)
+  })
+
+  it('breach level (act) when it drops below 50, regardless of how soon', () => {
+    const points = [
+      { horizon: 1, date: '2026-09-26', predicted: 58 },
+      { horizon: 2, date: '2026-09-27', predicted: 54 },
+      { horizon: 3, date: '2026-09-28', predicted: 48 },
+    ]
+    const r = assessBanded(points, alk)
+    expect(r.level).toBe('breach')
+    // firstBreachHorizon points to the act-line crossing.
+    expect(r.firstBreachHorizon).toBe(3)
+    expect(r.message).toMatch(/crosses below the 50 act line/)
+    expect(r.message).toMatch(/Treatability drops sharply below 50/)
+  })
+
+  it('clear when it stays above the watch line', () => {
+    const points = [
+      { horizon: 1, date: '2026-09-26', predicted: 66 },
+      { horizon: 2, date: '2026-09-27', predicted: 63 },
+    ]
+    const r = assessBanded(points, alk)
+    expect(r.level).toBe('clear')
+    expect(r.firstBreachHorizon).toBeNull()
+    expect(r.message).toMatch(/stays above the 60 watch line/)
+  })
+
+  it('handles an empty forecast', () => {
+    expect(assessBanded([], alk).message).toMatch(/No forecast/)
   })
 })
 
-it('handles an empty forecast', () => {
+it('handles an empty forecast (single threshold)', () => {
   expect(assess([], toc).message).toMatch(/No forecast/)
 })
