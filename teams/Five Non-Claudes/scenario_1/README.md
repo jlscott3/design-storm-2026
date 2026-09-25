@@ -1,14 +1,39 @@
 # TOC & Alkalinity Prediction Viewer — Team Five Non-Claudes
 
 Scenario 1 for the [Design Storm 2026](../../../README.md) challenge: a purpose-built web
-app that shows the upstream signals behind a prediction of TOC and alkalinity arriving
-at Denver Water's Foothills treatment plant, lets you change the forecast lead time
-with a slider, and displays a simple, explainable model's prediction against the actual
-lab values.
+app that predicts TOC and alkalinity arriving at Denver Water's Foothills treatment
+plant from upstream signals. The model is a single-feature linear regression fitted
+**live in the browser**.
 
-The model is a single-feature linear regression fitted **live in the browser**. Move
-the lead-time slider and it re-fits and re-scores instantly, so an audience can watch
-the trade between warning time and accuracy in real time.
+The app has two tabs:
+
+- **Live forecast** — the operator-facing view. It pulls *current* upstream conditions
+  from public feeds, forecasts TOC and alkalinity for the next 1-7 days, checks each
+  against an adjustable operating threshold, and states plainly what's coming. It
+  answers the sketch's two questions ("do I need to change chemicals / request an
+  upstream change?") descriptively — it never prescribes dosing, which stays the
+  operator's call.
+- **Explorer** — the analysis view. Pick a target, a feature, and a lead time (lag)
+  and watch the model re-fit and re-score against the historical lab values, so you
+  can judge which signals and lead times actually predict well. Includes the
+  upstream-gage-vs-Strontia-sonde comparison.
+
+### Live data sources (keyless, CORS-open)
+
+The Live forecast tab fetches these in the browser; each falls back to the last
+archived value if offline:
+
+| Signal | Source |
+|---|---|
+| Turbidity, conductance | USGS IV, gage 06707525 (params 63680, 00095) |
+| Streamflow | USGS IV, gage 06701900 (param 00060 — the WQ gage publishes no flow) |
+| Snowpack SWE | NRCS SNOTEL, Hoosier Pass (531:CO:SNTL, WTEQ) |
+
+### Thresholds
+
+Adjustable in the Live forecast tab. Defaults: TOC ≥ 3 mg/L (a demo "elevated" cutoff,
+not a regulatory limit) and alkalinity ≤ 60 mg/L (Jake's low-alkalinity line). Denver
+Water's own guide questions whether 60 is the number operators act on, so it's editable.
 
 ## Stack
 
@@ -32,9 +57,9 @@ npm run dev
 Then open the URL Vite prints (default http://localhost:5173/). `npm run build`
 produces a static bundle in `dist/`; `npm run preview` serves that bundle.
 
-The app runs fully offline off the bundled `series.json`. If you happen to be online,
-a small badge in the header shows the latest live USGS reading at the upstream gage;
-if you are not, it quietly says so and nothing else changes.
+The Explorer tab runs fully offline off the bundled `series.json`. The Live forecast
+tab fetches current readings when online and falls back to the last archived value per
+signal when not, labeling each as "live" or "archived" so nothing is misrepresented.
 
 ## Tests
 
@@ -75,24 +100,38 @@ predicted-vs-actual chart + formula + R²/RMSE/MAE   (src/components/*)
 - **Honest scoring**: trained on the earlier half of the timeline, scored on the later
   half it never saw, no shuffling. R² of 0 means no better than guessing the average.
 
-## On-stage script (about a minute)
+## On-stage script (about two minutes)
+
+**Live forecast tab (the operator's view):**
 
 1. "Denver Water only learns TOC and alkalinity after the water reaches the plant — a
    lab runs a grab sample. We're trying to see it coming a few days out from cheap
    upstream sensors."
-2. "Here's TOC. The orange line is what the lab actually measured. The dashed blue line
-   is a one-variable model: TOC from turbidity times flow, the muddy-high-water signal,
-   measured two days upstream." Point at the train/test divider: "it only learned from
-   the left; everything right of the line is the honest test."
-3. Read the formula and the test R² aloud. "One number, one line — and it already
+2. Point at the current-conditions row. "This is the South Platte right now — turbidity,
+   flow, conductance, snowpack, pulled live from USGS and NRCS." (If offline: "here it's
+   showing the last archived day, labeled as such.")
+3. Point at the recommendation card and the two threshold charts. "From today's reading
+   the model projects TOC and alkalinity out seven days and checks each against the
+   operating threshold. The card says, in plain language, whether and when we cross it —
+   that's the heads-up an operator wants. It describes what's coming; it doesn't tell
+   them what to dose."
+4. Nudge a threshold. "Denver Water asks whether 60 is really the number they act on —
+   so it's adjustable, and the recommendation updates."
+
+**Explorer tab (how good is the model, really):**
+
+5. "Here's TOC over four years. The orange line is what the lab actually measured. The
+   dashed blue line is that same one-variable model." Point at the train/test divider:
+   "it only learned from the left; everything right of the line is the honest test."
+6. Read the formula and the test R² aloud. "One number, one line — and it already
    tracks the big spring peaks."
-4. Drag the lead-time slider. "More lead time for the operators costs some accuracy —
+7. Drag the lead-time slider. "More lead time for the operators costs some accuracy —
    watch the score move. That trade is the whole question Denver Water put to us."
-5. Toggle to Alkalinity. "Different signal — specific conductance, dissolved minerals —
+8. Toggle to Alkalinity. "Different signal — specific conductance, dissolved minerals —
    and a straight line explains about half the variation on its own."
-6. Gesture at the upstream-signals panel. "These are the things that arrive before the
+9. Gesture at the upstream-signals panel. "These are the things that arrive before the
    water does. The one outlined in blue is what's driving the prediction right now."
-7. Drop to the comparison card. "Cassidi starred one idea: the reservoir sonde, which
+10. Drop to the comparison card. "Cassidi starred one idea: the reservoir sonde, which
    sits right at the plant intake. It should be a sharper signal — but it buys you
    hours of warning instead of days, and we only have one partial season of it. So the
    honest answer is 'promising, go collect more,' not 'it wins.'"

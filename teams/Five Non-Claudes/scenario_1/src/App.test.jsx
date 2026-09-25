@@ -20,4 +20,13 @@ describe('App offline resilience', () => {
       expect(screen.getByTestId('live-badge').textContent).toMatch(/offline/i),
     )
   })
+
+  it('shows both tabs with Live forecast selected by default', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'))
+    render(<App />)
+    const forecastTab = screen.getByRole('tab', { name: 'Live forecast' })
+    const explorerTab = screen.getByRole('tab', { name: 'Explorer' })
+    expect(forecastTab).toHaveAttribute('aria-selected', 'true')
+    expect(explorerTab).toHaveAttribute('aria-selected', 'false')
+  })
 })

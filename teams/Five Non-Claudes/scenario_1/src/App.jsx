@@ -10,12 +10,19 @@ import PredictorPanel from './components/PredictorPanel.jsx'
 import SourceComparison from './components/SourceComparison.jsx'
 import LiveBadge from './components/LiveBadge.jsx'
 import DataTerms from './components/DataTerms.jsx'
+import LiveForecast from './components/LiveForecast.jsx'
 
 const TARGET_COLORS = { toc: '#ffb454', alk: '#4ecab0' }
+
+const TABS = [
+  { id: 'forecast', label: 'Live forecast' },
+  { id: 'explorer', label: 'Explorer' },
+]
 
 export default function App() {
   const [doc, setDoc] = useState(null)
   const [error, setError] = useState(null)
+  const [tab, setTab] = useState('forecast')
 
   useEffect(() => {
     loadSeries()
@@ -35,10 +42,26 @@ export default function App() {
         <LiveBadge paramKey="turbidity" />
       </header>
 
+      <nav className="tabs" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`tab${tab === t.id ? ' active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
       <main className="app-main">
         {error && <p className="error">Could not load data: {error}</p>}
         {!doc && !error && <p className="placeholder">Loading bundled data…</p>}
-        {doc && <PredictionView doc={doc} />}
+        {doc && tab === 'forecast' && <LiveForecast doc={doc} />}
+        {doc && tab === 'explorer' && <PredictionView doc={doc} />}
       </main>
 
       <DataTerms provisionalNote={doc?._meta?.provisional_note} />
