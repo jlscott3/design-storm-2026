@@ -51,17 +51,17 @@ describe('riverOutlook', () => {
     }
   })
 
-  it('stops at 4 and then 2 days out, following the river toward the plant', () => {
+  it('stops at 2 and then 4 days out, nearest first, so the map reads left to right in time', () => {
     const o = riverOutlook(series, resolvedWith(450, 300), DEFAULT_THRESHOLDS, today)
     expect(o.ahead.map((s) => s.horizon)).toEqual(MAP_HORIZONS)
-    expect(o.ahead.map((s) => s.toc.date)).toEqual(['2026-09-29', '2026-09-27'])
+    expect(o.ahead.map((s) => s.toc.date)).toEqual(['2026-09-27', '2026-09-29'])
   })
 
   it('flags a forecast that crosses the operating threshold', () => {
     const high = riverOutlook(series, resolvedWith(10000, 300), DEFAULT_THRESHOLDS, today)
-    expect(high.ahead[1].toc.flag).toEqual({ tier: 'act', line: 3 })
+    expect(high.ahead[0].toc.flag).toEqual({ tier: 'act', line: 3 })
     const low = riverOutlook(series, resolvedWith(100, 300), DEFAULT_THRESHOLDS, today)
-    expect(low.ahead[1].toc.flag).toBeNull()
+    expect(low.ahead[0].toc.flag).toBeNull()
   })
 
   it('names the most serious alkalinity line crossed, as the Live tab does', () => {

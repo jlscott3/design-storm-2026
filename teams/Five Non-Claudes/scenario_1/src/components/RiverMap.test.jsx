@@ -34,7 +34,9 @@ describe('RiverMap', () => {
     render(<RiverMap doc={makeDoc()} fetchImpl={fetchImpl} />)
     await waitFor(() => expect(screen.queryByText(/Fetching current upstream/)).toBeNull())
 
-    expect(screen.getAllByRole('article')).toHaveLength(4)
+    // Today first, the earliest warning (headwaters snow) last.
+    const headings = screen.getAllByRole('article').map((a) => within(a).getByRole('heading').textContent)
+    expect(headings).toEqual(['Foothills Plant', 'Arriving at the plant', 'Arriving at the plant', 'Headwaters'])
     expect(screen.getByRole('heading', { name: 'Headwaters' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Foothills Plant' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /Map of the South Platte basin/ })).toBeInTheDocument()
@@ -43,11 +45,11 @@ describe('RiverMap', () => {
     expect(within(early).getAllByText(/archived/).length).toBeGreaterThan(0)
   })
 
-  it('labels the forecast stops by days ahead, farthest first', async () => {
+  it('labels the forecast stops by days ahead, nearest first, so time runs left to right', async () => {
     const fetchImpl = vi.fn(() => Promise.reject(new Error('offline')))
     render(<RiverMap doc={makeDoc()} fetchImpl={fetchImpl} />)
     await waitFor(() => expect(screen.queryByText(/Fetching current upstream/)).toBeNull())
     const chips = screen.getAllByText(/^In \d days$/).map((el) => el.textContent)
-    expect(chips).toEqual(['In 4 days', 'In 2 days'])
+    expect(chips).toEqual(['In 2 days', 'In 4 days'])
   })
 })
